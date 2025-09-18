@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminPesananController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\ProfileController;
 
 // ==================== Landing Page ====================
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
@@ -25,7 +26,7 @@ Route::post('/keranjang/tambah/{id}', [KeranjangController::class, 'tambah'])->n
 Route::post('/keranjang/hapus/{id}', [KeranjangController::class, 'hapus'])->name('keranjang.hapus');
 
 // ==================== Pesanan / Checkout ====================
-Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout.index');
+Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
 Route::post('/checkout', [PesananController::class, 'prosesCheckout'])->name('checkout.proses');
 Route::get('/pesanan/cek', [PesananController::class, 'cekPesanan'])->name('pesanan.cek');
 
@@ -44,3 +45,17 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::resource('kategori', AdminKategoriController::class);
     Route::resource('pesanan', AdminPesananController::class);
 });
+
+// ==================== Authenticated User Routes (Breeze) ====================
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// ==================== Breeze Auth ====================
+require __DIR__.'/auth.php';
