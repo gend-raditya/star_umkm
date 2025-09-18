@@ -15,7 +15,7 @@
             <div class="space-x-4">
                 <a href="{{ route('landing') }}" class="hover:underline">Home</a>
                 <a href="{{ route('produk.index') }}" class="hover:underline">Produk</a>
-                <a href="{{ route('checkout') }}" class="hover:underline">Keranjang</a>
+                <a href="{{ route('checkout.index') }}" class="hover:underline">Keranjang</a>
                 <a href="{{ route('pesanan.cek') }}" class="hover:underline">Cek Pesanan</a>
             </div>
         </div>
