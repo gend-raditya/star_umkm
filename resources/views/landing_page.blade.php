@@ -13,7 +13,7 @@
             </a>
         @else
             <!-- Tombol untuk guest akan redirect ke login -->
-            <a href="{{ route('login') }}"
+            <a href="{{ route('register') }}"
                 class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700">
                 Belanja Sekarang
             </a>
@@ -38,7 +38,7 @@
                         </a>
                     @else
                         <!-- Redirect ke login untuk guest -->
-                        <a href="{{ route('login') }}"
+                        <a href="{{ route('register') }}"
                             class="mt-2 inline-block bg-indigo-600 text-white px-4 py-2 rounded">
                             Detail
                         </a>

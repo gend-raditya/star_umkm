@@ -33,15 +33,15 @@ class PesananController extends Controller
         session()->put('keranjang', $keranjang);
 
         // Redirect ke halaman checkout
-        return redirect()->route('checkout.index')
+        return redirect()->route('checkout')
                          ->with('success', 'Produk berhasil ditambahkan ke keranjang!');
     }
 
     // 👉 Halaman Checkout
     public function checkout()
     {
-        $keranjang = session()->get('keranjang', []);
-        return view('checkout.index', compact('keranjang'));
+        $keranjang = session('keranjang', []);
+        return view('pesanan.checkout', compact('keranjang'));
     }
 
     // 👉 Proses Checkout
