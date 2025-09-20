@@ -15,5 +15,10 @@ class Produk extends Model
     {
         return $this->belongsTo(Kategori::class);
     }
+
+     public function fotos()
+    {
+        return $this->hasMany(Foto::class);
+    }
 }
 

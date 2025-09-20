@@ -27,7 +27,7 @@ class ProdukController extends Controller
     // Detail produk
     public function show($id)
     {
-        $produk = Produk::findOrFail($id);
+        $produk = Produk::with('fotos')->findOrFail($id);
         return view('produk.show', compact('produk'));
     }
 

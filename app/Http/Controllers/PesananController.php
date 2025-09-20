@@ -50,7 +50,7 @@ class PesananController extends Controller
         // proses simpan ke DB pesanan nanti di sini
         session()->forget('keranjang');
 
-        return redirect()->route('checkout.index')
+        return redirect()->route('checkout.proses')
                          ->with('success', 'Pesanan berhasil dibuat!');
     }
 

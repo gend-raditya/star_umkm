@@ -17,25 +17,26 @@
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
     <div class="min-h-screen flex flex-col">
         <!-- Navbar -->
-        <nav class="bg-white shadow">
+        <nav class="absolute top-0 left-0 w-full bg-transparent z-50">
+
             <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
                 <a href="{{ url('/') }}" class="text-lg font-bold text-indigo-600">⭐ Star UMKM</a>
 
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('produk.index') }}" class="hover:underline">Produk</a>
+                    <a href="{{ route('produk.index') }}" class="text-white hover:text-yellow-400">Produk</a>
 
                     @auth
-                        <a href="{{ route('checkout') }}" class="hover:underline">Keranjang</a>
-                        <span class="text-gray-700">Halo, {{ auth()->user()->name }}</span>
+                        <a href="{{ route('checkout') }}" class="text-white hover:text-yellow-400">Keranjang</a>
+                        <span class="text-white hover:text-yellow-400">Halo, {{ auth()->user()->name }}</span>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
-                            <button type="submit" class="text-red-500 hover:underline">Logout</button>
+                            <button type="submit" class="text-white hover:text-yellow-400">Logout</button>
                         </form>
                     @else
                         <!-- Guest -->
-                        <a href="{{ route('checkout') }}" class="hover:underline">Keranjang</a>
-                        <a href="{{ route('login') }}" class="text-indigo-600 hover:underline">Login</a>
-                        <a href="{{ route('register') }}" class="text-indigo-600 hover:underline">Register</a>
+                        <a href="{{ route('checkout') }}" class="text-white hover:text-yellow-400">Keranjang</a>
+                        <a href="{{ route('login') }}" class="text-white hover:text-yellow-400">Login</a>
+                        <a href="{{ route('register') }}" class="text-white hover:text-yellow-400">Register</a>
                     @endauth
                 </div>
             </div>

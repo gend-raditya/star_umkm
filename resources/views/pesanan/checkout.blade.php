@@ -16,7 +16,7 @@
         </div>
         <div>
             <label class="block">Telepon</label>
-            <input type="text" name="telepon" class="w-full border rounded p-2" required>
+            <input type="text"   name="telepon" class="w-full border rounded p-2" required>
         </div>
 
         <h2 class="text-xl font-semibold mt-6 mb-2">Ringkasan Pesanan</h2>
