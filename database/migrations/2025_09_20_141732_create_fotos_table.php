@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('fotos', function (Blueprint $table) {
+        Schema::create('foto', function (Blueprint $table) {
             $table->id();
             $table->foreignId('produk_id')->constrained('produks')->onDelete('cascade');
             $table->string('path'); // simpan lokasi file
@@ -17,6 +17,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('fotos');
+        Schema::dropIfExists('foto');
     }
 };

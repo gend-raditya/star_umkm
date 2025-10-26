@@ -17,8 +17,9 @@
         </div>
     </nav>
 
-    <div class="container mx-auto mt-6">
-        @yield('content')
-    </div>
+    <div class="container mx-auto pt-20">
+    @yield('content')
+</div>
+
 </body>
 </html>

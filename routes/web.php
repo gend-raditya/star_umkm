@@ -57,5 +57,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Halaman checkout
+Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
+
+// Proses bayar semua isi keranjang
+Route::post('/checkout/proses', [PesananController::class, 'prosesCheckout'])->name('pesanan.prosesCheckout');
+
+// Halaman setelah bayar
+Route::get('/pesanan/cek', [PesananController::class, 'cekPesanan'])->name('pesanan.cek');
+
+
+// Route::post('/checkout-single', [PesananController::class, 'checkoutSingle'])->name('checkout.single');
+Route::post('/midtrans/callback', [PesananController::class, 'callback']);
+
+
+// ✅ Tampilkan halaman checkout satu produk
+Route::get('/checkout/single', [PesananController::class, 'checkoutSinglePage'])
+    ->name('checkout.single');
+
+// ✅ Proses pembayaran setelah isi form checkout
+Route::post('/checkout/single/process', [PesananController::class, 'checkoutSingleProcess'])
+    ->name('checkout.single.process');
+
+
+
 // ==================== Breeze Auth ====================
 require __DIR__.'/auth.php';

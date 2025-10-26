@@ -3,60 +3,91 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Produk;
 use App\Models\Keranjang;
+use App\Services\MidtransService;
 
 class PesananController extends Controller
 {
-    // 👉 Tambah ke Keranjang
-    public function tambahKeranjang(Request $request, $id)
-    {
-        // Cari produk berdasarkan ID
-        $produk = Produk::findOrFail($id);
-
-        // Simpan ke keranjang (contoh pake session / tabel keranjang)
-        $keranjang = session()->get('keranjang', []);
-
-        if (isset($keranjang[$id])) {
-            // kalau produk sudah ada, tambahkan qty
-            $keranjang[$id]['qty']++;
-        } else {
-            // kalau produk belum ada, masukkan baru
-            $keranjang[$id] = [
-                "nama"   => $produk->nama,
-                "harga"  => $produk->harga,
-                "gambar" => $produk->gambar,
-                "qty"    => 1
-            ];
-        }
-
-        session()->put('keranjang', $keranjang);
-
-        // Redirect ke halaman checkout
-        return redirect()->route('checkout')
-                         ->with('success', 'Produk berhasil ditambahkan ke keranjang!');
-    }
-
-    // 👉 Halaman Checkout
+    // ✅ Checkout (tampilkan data keranjang dari database)
     public function checkout()
     {
-        $keranjang = session('keranjang', []);
+        $user = Auth::user();
+        $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
+
         return view('pesanan.checkout', compact('keranjang'));
     }
 
-    // 👉 Proses Checkout
-    public function prosesCheckout(Request $request)
+    // ✅ Proses checkout semua produk dalam keranjang
+    public function prosesCheckout(Request $request, MidtransService $midtrans)
     {
-        // proses simpan ke DB pesanan nanti di sini
-        session()->forget('keranjang');
+        $user = Auth::user();
+        $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
 
-        return redirect()->route('checkout.proses')
-                         ->with('success', 'Pesanan berhasil dibuat!');
+        // Cek kalau keranjang kosong
+        if ($keranjang->isEmpty()) {
+            return response()->json(['error' => 'Keranjang kosong!'], 400);
+        }
+
+        // Hitung total dari database (bukan dari input user)
+        $totalDatabase = $keranjang->sum(function ($item) {
+            return $item->produk->harga * $item->jumlah;
+        });
+
+        // Pastikan request mengirim total
+        if (!$request->filled('total')) {
+            return response()->json(['error' => 'Total tidak ditemukan dalam request'], 400);
+        }
+
+        // Cek validasi total form vs total dari database
+        if ((int)$request->total !== (int)$totalDatabase) {
+            return response()->json([
+                'error' => 'Total tidak sesuai!',
+                'total_dari_form' => $request->total,
+                'total_hitung_db' => $totalDatabase,
+            ], 400);
+        }
+
+        // ✅ Buat Snap Token Midtrans
+        $snapToken = $midtrans->createTransaction(
+            'ORDER-' . time(),
+            $totalDatabase,
+            [
+                'first_name' => $request->nama_pemesan ?? $user->name ?? 'Guest',
+                'email'      => $user->email ?? 'guest@example.com',
+            ]
+        );
+
+
+        return response()->json(['snap_token' => $snapToken]);
     }
 
-    // 👉 Cek Pesanan
-    public function cekPesanan()
+    // ✅ Checkout satu produk langsung dari halaman detail
+    // ✅ Checkout satu produk - tampilkan halaman checkout
+    // ✅ Checkout satu produk → tampilkan halaman form checkout
+    public function checkoutSinglePage($id, $jumlah = 1)
     {
-        return view('pesanan.cek');
+        $produk = Produk::findOrFail($id);
+        return view('pesanan.checkout_single', compact('produk', 'jumlah'));
+    }
+
+    public function checkoutSingleProcess(Request $request, MidtransService $midtrans)
+    {
+        $produk = Produk::findOrFail($request->produk_id);
+        $jumlah = (int)$request->jumlah;
+        $total = $produk->harga * $jumlah;
+
+        // Buat Snap Token Midtrans
+        $snapToken = $midtrans->createTransaction(
+            'ORDER-' . time(),
+            $total,
+            [
+                'first_name' => $request->nama_pemesan ?? 'Guest',
+                'email'      => Auth::user()->email ?? 'guest@example.com',
+            ]
+        );
+
+        return response()->json(['snap_token' => $snapToken]);
     }
 }
