@@ -84,6 +84,11 @@
                             class="text-black/90 hover:text-black font-medium transition-colors duration-200">
                             Tentang Kami
                         </a>
+
+                        <a href="{{ route('pesanan.saya') }}"
+       class="text-black/90 hover:text-black font-medium transition-colors duration-200">
+                            Pesanan Saya
+                        </a>
                     </div>
 
                     <!-- Right Side Actions -->

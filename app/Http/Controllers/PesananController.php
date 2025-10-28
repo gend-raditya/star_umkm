@@ -7,12 +7,14 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Produk;
 use App\Models\Keranjang;
 use App\Services\MidtransService;
+use App\Models\Pesanan;
 
 class PesananController extends Controller
 {
     // ✅ Checkout (tampilkan data keranjang dari database)
     public function checkout()
     {
+
         $user = Auth::user();
         $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
 
@@ -25,33 +27,46 @@ class PesananController extends Controller
         $user = Auth::user();
         $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
 
-        // Cek kalau keranjang kosong
         if ($keranjang->isEmpty()) {
             return response()->json(['error' => 'Keranjang kosong!'], 400);
         }
 
-        // Hitung total dari database (bukan dari input user)
-        $totalDatabase = $keranjang->sum(function ($item) {
-            return $item->produk->harga * $item->jumlah;
-        });
+        $totalDatabase = $keranjang->sum(fn($item) => $item->produk->harga * $item->jumlah);
 
-        // Pastikan request mengirim total
-        if (!$request->filled('total')) {
-            return response()->json(['error' => 'Total tidak ditemukan dalam request'], 400);
-        }
-
-        // Cek validasi total form vs total dari database
         if ((int)$request->total !== (int)$totalDatabase) {
-            return response()->json([
-                'error' => 'Total tidak sesuai!',
-                'total_dari_form' => $request->total,
-                'total_hitung_db' => $totalDatabase,
-            ], 400);
+            return response()->json(['error' => 'Total tidak sesuai!'], 400);
         }
+
+        // ✅ Buat kode invoice unik
+        $invoice = 'INV-' . strtoupper(uniqid());
+
+        // ✅ Simpan ke tabel pesanans
+        $pesanan = Pesanan::create([
+            'user_id' => $user->id,
+            'invoice' => $invoice,
+            'nama' => $request->nama_pemesan ?? $user->name,
+            'no_hp' => $request->telepon,
+            'alamat' => $request->alamat,
+            'total' => $totalDatabase,
+            'status' => 'Diproses',
+        ]);
+
+        // ✅ Simpan item ke tabel pesanan_items
+        foreach ($keranjang as $item) {
+            \App\Models\PesananItem::create([
+                'pesanan_id' => $pesanan->id,
+                'produk_id'  => $item->produk->id,
+                'jumlah'     => $item->jumlah,
+                'subtotal'   => $item->produk->harga * $item->jumlah,
+            ]);
+        }
+
+        // ✅ Kosongkan keranjang user
+        Keranjang::where('user_id', $user->id)->delete();
 
         // ✅ Buat Snap Token Midtrans
         $snapToken = $midtrans->createTransaction(
-            'ORDER-' . time(),
+            $invoice,
             $totalDatabase,
             [
                 'first_name' => $request->nama_pemesan ?? $user->name ?? 'Guest',
@@ -59,19 +74,26 @@ class PesananController extends Controller
             ]
         );
 
-
         return response()->json(['snap_token' => $snapToken]);
     }
 
-    // ✅ Checkout satu produk langsung dari halaman detail
+
+    // ✅ Halaman setelah pembayaran berhasil
+    public function success()
+    {
+        $pesanan = Pesanan::orderBy('created_at', 'desc')->get();
+
+        return view('pesanan.success', compact('pesanan'));
+    }
+
     // ✅ Checkout satu produk - tampilkan halaman checkout
-    // ✅ Checkout satu produk → tampilkan halaman form checkout
     public function checkoutSinglePage($id, $jumlah = 1)
     {
         $produk = Produk::findOrFail($id);
         return view('pesanan.checkout_single', compact('produk', 'jumlah'));
     }
 
+    // ✅ Proses checkout untuk satu produk
     public function checkoutSingleProcess(Request $request, MidtransService $midtrans)
     {
         $produk = Produk::findOrFail($request->produk_id);
@@ -89,5 +111,27 @@ class PesananController extends Controller
         );
 
         return response()->json(['snap_token' => $snapToken]);
+    }
+
+    public function pesananSaya()
+    {
+        $user = Auth::user();
+
+        $pesanans = \App\Models\Pesanan::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('pesanan.saya', compact('pesanans'));
+    }
+
+
+
+    public function detailPesanan($id)
+    {
+        $pesanan = \App\Models\Pesanan::with(['items.produk'])
+            ->where('user_id', Auth::id())
+            ->findOrFail($id);
+
+        return view('pesanan.detail', compact('pesanan'));
     }
 }

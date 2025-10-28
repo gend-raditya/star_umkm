@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->string('no_hp');
+             $table->string('invoice')->unique();
             $table->string('alamat');
             $table->string('metode_pembayaran')->default('Transfer Bank');
             $table->decimal('total', 12, 2);

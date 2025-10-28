@@ -25,10 +25,28 @@ Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang
 Route::post('/keranjang/tambah/{id}', [KeranjangController::class, 'tambah'])->name('keranjang.tambah');
 Route::post('/keranjang/hapus/{id}', [KeranjangController::class, 'hapus'])->name('keranjang.hapus');
 
-// ==================== Pesanan / Checkout ====================
-Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
-Route::post('/checkout', [PesananController::class, 'prosesCheckout'])->name('checkout.proses');
+// ==================== Pesanan & Checkout ====================
+Route::middleware(['auth'])->group(function () {
+    // Halaman checkout (isi keranjang)
+    Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
+    // Proses pembayaran Midtrans
+    Route::post('/checkout/proses', [PesananController::class, 'prosesCheckout'])->name('pesanan.prosesCheckout');
+    // Halaman sukses setelah bayar
+    Route::get('/pesanan/success', [PesananController::class, 'success'])->name('pesanan.success');
+    // Lihat semua pesanan user
+    Route::get('/pesanan/saya', [PesananController::class, 'pesananSaya'])->name('pesanan.saya');
+    Route::get('/pesanan/{id}/detail', [PesananController::class, 'detailPesanan'])->name('pesanan.detail');
+});
+
+// Cek status pesanan (tanpa login)
 Route::get('/pesanan/cek', [PesananController::class, 'cekPesanan'])->name('pesanan.cek');
+
+// Midtrans callback (notifikasi server)
+Route::post('/midtrans/callback', [PesananController::class, 'callback'])->name('midtrans.callback');
+
+// ==================== Checkout Satu Produk ====================
+Route::get('/checkout/single', [PesananController::class, 'checkoutSinglePage'])->name('checkout.single');
+Route::post('/checkout/single/process', [PesananController::class, 'checkoutSingleProcess'])->name('checkout.single.process');
 
 // ==================== Admin Auth ====================
 Route::get('admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
@@ -46,7 +64,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::resource('pesanan', AdminPesananController::class);
 });
 
-// ==================== Authenticated User Routes (Breeze) ====================
+// ==================== Breeze Auth (User) ====================
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
@@ -57,29 +75,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Halaman checkout
-Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
-
-// Proses bayar semua isi keranjang
-Route::post('/checkout/proses', [PesananController::class, 'prosesCheckout'])->name('pesanan.prosesCheckout');
-
-// Halaman setelah bayar
-Route::get('/pesanan/cek', [PesananController::class, 'cekPesanan'])->name('pesanan.cek');
-
-
-// Route::post('/checkout-single', [PesananController::class, 'checkoutSingle'])->name('checkout.single');
-Route::post('/midtrans/callback', [PesananController::class, 'callback']);
-
-
-// ✅ Tampilkan halaman checkout satu produk
-Route::get('/checkout/single', [PesananController::class, 'checkoutSinglePage'])
-    ->name('checkout.single');
-
-// ✅ Proses pembayaran setelah isi form checkout
-Route::post('/checkout/single/process', [PesananController::class, 'checkoutSingleProcess'])
-    ->name('checkout.single.process');
-
-
-
-// ==================== Breeze Auth ====================
+// ==================== Auth Routes (Breeze Default) ====================
 require __DIR__.'/auth.php';
