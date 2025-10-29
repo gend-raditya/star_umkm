@@ -75,5 +75,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/profile/password', [ProfileController::class, 'editPassword'])->name('profile.password');
+
+// Halaman Update Password
+Route::middleware(['auth'])->get('/profile/password', [ProfileController::class, 'editPassword'])->name('profile.password');
+
 // ==================== Auth Routes (Breeze Default) ====================
 require __DIR__.'/auth.php';

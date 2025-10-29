@@ -12,35 +12,44 @@ use App\Models\Pesanan;
 class PesananController extends Controller
 {
     // ✅ Checkout (tampilkan data keranjang dari database)
-    public function checkout()
+    public function checkout(Request $request)
     {
-
         $user = Auth::user();
-        $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
+
+        // Jika ada parameter id (checkout langsung 1 produk)
+        if ($request->has('id')) {
+            $produk = Produk::findOrFail($request->id);
+            $jumlah = $request->jumlah ?? 1;
+
+            // Simulasi data seperti keranjang
+            $keranjang = collect([
+                (object)[
+                    'produk' => $produk,
+                    'jumlah' => $jumlah,
+                ]
+            ]);
+        } else {
+            // Kalau tidak ada id, ambil semua dari keranjang
+            $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
+        }
 
         return view('pesanan.checkout', compact('keranjang'));
     }
 
+
     // ✅ Proses checkout semua produk dalam keranjang
     public function prosesCheckout(Request $request, MidtransService $midtrans)
-    {
-        $user = Auth::user();
-        $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
+{
+    $user = Auth::user();
 
-        if ($keranjang->isEmpty()) {
-            return response()->json(['error' => 'Keranjang kosong!'], 400);
-        }
+    // 🟩 Cek apakah checkout dari satu produk langsung
+    if ($request->has('produk_id')) {
+        $produk = Produk::findOrFail($request->produk_id);
+        $jumlah = (int)$request->jumlah;
+        $totalDatabase = $produk->harga * $jumlah;
 
-        $totalDatabase = $keranjang->sum(fn($item) => $item->produk->harga * $item->jumlah);
-
-        if ((int)$request->total !== (int)$totalDatabase) {
-            return response()->json(['error' => 'Total tidak sesuai!'], 400);
-        }
-
-        // ✅ Buat kode invoice unik
         $invoice = 'INV-' . strtoupper(uniqid());
 
-        // ✅ Simpan ke tabel pesanans
         $pesanan = Pesanan::create([
             'user_id' => $user->id,
             'invoice' => $invoice,
@@ -51,20 +60,13 @@ class PesananController extends Controller
             'status' => 'Diproses',
         ]);
 
-        // ✅ Simpan item ke tabel pesanan_items
-        foreach ($keranjang as $item) {
-            \App\Models\PesananItem::create([
-                'pesanan_id' => $pesanan->id,
-                'produk_id'  => $item->produk->id,
-                'jumlah'     => $item->jumlah,
-                'subtotal'   => $item->produk->harga * $item->jumlah,
-            ]);
-        }
+        \App\Models\PesananItem::create([
+            'pesanan_id' => $pesanan->id,
+            'produk_id'  => $produk->id,
+            'jumlah'     => $jumlah,
+            'subtotal'   => $totalDatabase,
+        ]);
 
-        // ✅ Kosongkan keranjang user
-        Keranjang::where('user_id', $user->id)->delete();
-
-        // ✅ Buat Snap Token Midtrans
         $snapToken = $midtrans->createTransaction(
             $invoice,
             $totalDatabase,
@@ -77,11 +79,65 @@ class PesananController extends Controller
         return response()->json(['snap_token' => $snapToken]);
     }
 
+    // 🟨 Kalau checkout dari keranjang (default)
+    $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
+
+    if ($keranjang->isEmpty()) {
+        return response()->json(['error' => 'Keranjang kosong!'], 400);
+    }
+
+    $totalDatabase = $keranjang->sum(fn($item) => $item->produk->harga * $item->jumlah);
+
+    if ((int)$request->total !== (int)$totalDatabase) {
+        return response()->json(['error' => 'Total tidak sesuai!'], 400);
+    }
+
+    $invoice = 'INV-' . strtoupper(uniqid());
+
+    $pesanan = Pesanan::create([
+        'user_id' => $user->id,
+        'invoice' => $invoice,
+        'nama' => $request->nama_pemesan ?? $user->name,
+        'no_hp' => $request->telepon,
+        'alamat' => $request->alamat,
+        'total' => $totalDatabase,
+        'status' => 'Diproses',
+    ]);
+
+    foreach ($keranjang as $item) {
+        \App\Models\PesananItem::create([
+            'pesanan_id' => $pesanan->id,
+            'produk_id'  => $item->produk->id,
+            'jumlah'     => $item->jumlah,
+            'subtotal'   => $item->produk->harga * $item->jumlah,
+        ]);
+    }
+
+    Keranjang::where('user_id', $user->id)->delete();
+
+    $snapToken = $midtrans->createTransaction(
+        $invoice,
+        $totalDatabase,
+        [
+            'first_name' => $request->nama_pemesan ?? $user->name ?? 'Guest',
+            'email'      => $user->email ?? 'guest@example.com',
+        ]
+    );
+
+    return response()->json(['snap_token' => $snapToken]);
+}
+
+
 
     // ✅ Halaman setelah pembayaran berhasil
     public function success()
     {
-        $pesanan = Pesanan::orderBy('created_at', 'desc')->get();
+        $user = Auth::user();
+
+        // tampilkan semua pesanan dari user yang sedang login
+        $pesanan = Pesanan::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('pesanan.success', compact('pesanan'));
     }

@@ -9,6 +9,12 @@
         <form id="checkout-form" action="{{ route('pesanan.prosesCheckout') }}" method="POST" class="space-y-4">
             @csrf
 
+            {{-- 🟩 Hidden field kalau checkout langsung --}}
+            @if (request()->has('id'))
+                <input type="hidden" name="produk_id" value="{{ request()->id }}">
+                <input type="hidden" name="jumlah" value="{{ request()->jumlah ?? 1 }}">
+            @endif
+
             <div>
                 <label class="block">Nama Pemesan</label>
                 <input type="text" name="nama_pemesan" id="nama_pemesan" class="w-full border rounded p-2"
@@ -27,9 +33,10 @@
 
             <h2 class="text-xl font-semibold mt-6 mb-2">Ringkasan Pesanan</h2>
             <ul class="space-y-2">
+                @php $total = 0; @endphp
                 @foreach ($keranjang as $item)
                     @php
-                        $subtotal = $item->produk->harga * $item->jumlah;
+                        $subtotal = isset($item->subtotal) ? $item->subtotal : $item->produk->harga * $item->jumlah;
                         $total += $subtotal;
                     @endphp
                     <li class="flex justify-between">
@@ -53,38 +60,27 @@
 @endsection
 
 @section('scripts')
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}">
-    </script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
 
     <script>
         document.getElementById('checkout-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const url = e.target.action;
-
-            const data = {
-                nama_pemesan: document.getElementById('nama_pemesan').value,
-                alamat: document.getElementById('alamat').value,
-                telepon: document.getElementById('telepon').value,
-                total: document.getElementById('total-field').value
-            };
-
-            fetch(url, {
+            fetch(e.target.action, {
                     method: "POST",
                     headers: {
                         "X-CSRF-TOKEN": "{{ csrf_token() }}"
                     },
                     body: new FormData(e.target)
                 })
-
                 .then(res => res.json())
                 .then(data => {
                     if (data.snap_token) {
                         snap.pay(data.snap_token, {
-                            onSuccess: function(result) {
+                            onSuccess: function() {
                                 window.location.href = "/pesanan/success";
                             },
-                            onPending: function(result) {
+                            onPending: function() {
                                 alert("Menunggu pembayaran...");
                             },
                             onError: function(result) {

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+{{-- @extends('layouts.app')
 
 @section('content')
 <div class="container mx-auto py-8">
@@ -78,4 +78,4 @@ document.getElementById('checkoutForm').addEventListener('submit', function (e) 
     });
 });
 </script>
-@endsection
+@endsection --}}

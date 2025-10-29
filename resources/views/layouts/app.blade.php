@@ -85,10 +85,7 @@
                             Tentang Kami
                         </a>
 
-                        <a href="{{ route('pesanan.saya') }}"
-       class="text-black/90 hover:text-black font-medium transition-colors duration-200">
-                            Pesanan Saya
-                        </a>
+                       
                     </div>
 
                     <!-- Right Side Actions -->
@@ -106,16 +103,43 @@
                         </a>
 
                         @auth
-                            <!-- User Menu -->
-                            <div class="hidden sm:flex items-center space-x-3">
-                                <span class="text-black/90 text-sm">Halo, {{ auth()->user()->name }}</span>
-                                <form method="POST" action="{{ route('logout') }}" class="inline">
-                                    @csrf
-                                    <button type="submit"
-                                        class="bg-white/20 text-black px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-200 text-sm font-medium">
-                                        Logout
-                                    </button>
-                                </form>
+                            <!-- User Dropdown -->
+                            <div class="relative" x-data="{ open: false }">
+                                <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
+                                    <!-- Foto Profil -->
+                                    <img src="{{ Auth::user()->foto ? asset('storage/' . Auth::user()->foto) : asset('images/default.png') }}"
+                                        alt="{{ Auth::user()->name }}"
+                                        class="w-8 h-8 rounded-full object-cover border-2 border-white/30">
+                                    <span class="text-black/90 text-sm font-medium">{{ Auth::user()->name }}</span>
+                                    <svg class="w-4 h-4 text-black/60" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+
+                                <!-- Dropdown Menu -->
+                                <div x-show="open" @click.outside="open = false"
+                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50 transition-all duration-200"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 transform scale-95"
+                                    x-transition:enter-end="opacity-100 transform scale-100"
+                                    x-transition:leave="transition ease-in duration-150"
+                                    x-transition:leave-start="opacity-100 transform scale-100"
+                                    x-transition:leave-end="opacity-0 transform scale-95">
+
+                                    <a href="{{ route('profile.edit') }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Akun Saya</a>
+                                    <a href="{{ route('pesanan.saya') }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pesanan Saya</a>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit"
+                                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Logout
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         @else
                             <!-- Guest Actions -->
@@ -315,7 +339,7 @@
             }
         });
     </script>
-     @yield('scripts')
+    @yield('scripts')
 </body>
 
 </html>

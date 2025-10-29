@@ -24,11 +24,12 @@
                     </button>
                 </form>
 
-<form action="{{ route('checkout.single', ['id' => $produk->id, 'jumlah' => 1]) }}" method="GET">
-    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded">
-        💳 Checkout Sekarang
-    </button>
-</form>
+                <a href="{{ route('checkout') }}?id={{ $produk->id }}&jumlah=1"
+                    class="bg-indigo-600 text-white px-4 py-2 rounded">
+                    💳 Checkout Sekarang
+                </a>
+
+
 
 
 
