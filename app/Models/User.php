@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+
     ];
 
     /**
@@ -44,5 +45,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // 🔥 Relasi ke produk
+    public function produk()
+    {
+        return $this->hasMany(\App\Models\Produk::class, 'user_id');
     }
 }

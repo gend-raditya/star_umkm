@@ -8,6 +8,8 @@
 
     <title>{{ config('app.name', 'Star UMKM') }}</title>
 
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -55,58 +57,59 @@
         <header class="fixed top-0 left-0 w-full z-50 transition-all duration-300">
             <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div class="flex items-center justify-between bg-white/10 glass rounded-full px-6 py-3 shadow-lg">
+
                     <!-- Logo -->
                     <div class="flex items-center">
                         <a href="{{ url('/') }}" class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                                <span class="text-black text-lg font-bold">⭐</span> <!-- ubah putih jadi hitam -->
+                                <span class="text-black text-lg font-bold">⭐</span>
                             </div>
                             <span class="text-xl font-bold text-black hidden sm:block">Star UMKM</span>
-                            <!-- putih -> hitam -->
                         </a>
                     </div>
 
                     <!-- Desktop Navigation -->
                     <div class="hidden lg:flex items-center space-x-8">
                         <a href="{{ url('/') }}"
-                            class="text-black/90 hover:text-black font-medium transition-colors duration-200">
-                            Beranda
-                        </a>
+                            class="text-black/90 hover:text-black font-medium transition-colors duration-200">Beranda</a>
                         <a href="{{ route('produk.index') }}"
-                            class="text-black/90 hover:text-black font-medium transition-colors duration-200">
-                            Produk
-                        </a>
+                            class="text-black/90 hover:text-black font-medium transition-colors duration-200">Produk</a>
                         <a href="#"
-                            class="text-black/90 hover:text-black font-medium transition-colors duration-200">
-                            Promo
-                        </a>
+                            class="text-black/90 hover:text-black font-medium transition-colors duration-200">Promo</a>
                         <a href="#"
-                            class="text-black/90 hover:text-black font-medium transition-colors duration-200">
-                            Tentang Kami
-                        </a>
-
-                       
+                            class="text-black/90 hover:text-black font-medium transition-colors duration-200">Tentang
+                            Kami</a>
                     </div>
 
-                    <!-- Right Side Actions -->
+                    <!-- Right Side -->
                     <div class="flex items-center space-x-4">
-                        <!-- Cart -->
-                        <a href="{{ route('checkout') }}"
-                            class="relative p-2 text-black/90 hover:text-black transition-colors duration-200">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.8-5M7 13l-1.8-5m0 0L5.4 5M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6">
-                                </path>
-                            </svg>
-                            <span
-                                class="absolute -top-1 -right-1 bg-orange-400 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">3</span>
-                        </a>
 
+
+
+
+                        <!-- 🛒 Cart Icon (hanya muncul kalau user login) -->
                         @auth
-                            <!-- User Dropdown -->
+                            <a href="{{ route('keranjang.index') }}"
+                                class="relative p-2 text-black/90 hover:text-black transition-colors duration-200">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.8-5M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6">
+                                    </path>
+                                </svg>
+                                @php
+                                    $count = \App\Models\Keranjang::where('user_id', Auth::id())->sum('jumlah');
+                                @endphp
+                                <span
+                                    class="absolute -top-1 -right-1 bg-orange-400 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                    {{ $count }}
+                                </span>
+                            </a>
+                        @endauth
+
+                        <!-- 🔽 User Menu -->
+                        @auth
                             <div class="relative" x-data="{ open: false }">
                                 <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
-                                    <!-- Foto Profil -->
                                     <img src="{{ Auth::user()->foto ? asset('storage/' . Auth::user()->foto) : asset('images/default.png') }}"
                                         alt="{{ Auth::user()->name }}"
                                         class="w-8 h-8 rounded-full object-cover border-2 border-white/30">
@@ -118,20 +121,32 @@
                                     </svg>
                                 </button>
 
-                                <!-- Dropdown Menu -->
                                 <div x-show="open" @click.outside="open = false"
-                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50 transition-all duration-200"
-                                    x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="opacity-0 transform scale-95"
-                                    x-transition:enter-end="opacity-100 transform scale-100"
-                                    x-transition:leave="transition ease-in duration-150"
-                                    x-transition:leave-start="opacity-100 transform scale-100"
-                                    x-transition:leave-end="opacity-0 transform scale-95">
-
-                                    <a href="{{ route('profile.edit') }}"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Akun Saya</a>
+                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
+                                    <a href="{{ route('user.dashboard') }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Saya</a>
                                     <a href="{{ route('pesanan.saya') }}"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pesanan Saya</a>
+
+                                    @if (!Auth::user()->is_seller)
+                                        <form method="POST" action="{{ route('seller.register') }}">
+                                            @csrf
+                                            <button type="submit"
+                                                class="w-full text-left px-4 py-2 text-sm text-blue-700 hover:bg-blue-100 font-semibold">
+                                                💼 Ajukan Jadi Seller
+                                            </button>
+                                        </form>
+                                    @elseif(Auth::user()->seller_status === 'pending')
+                                        <span class="block px-4 py-2 text-sm text-yellow-600 font-semibold">
+                                            ⏳ Menunggu Persetujuan
+                                        </span>
+                                    @elseif(Auth::user()->seller_status === 'approved')
+                                        <a href="{{ route('seller.dashboard') }}"
+                                            class="block px-4 py-2 text-sm text-green-700 hover:bg-green-100 font-semibold">
+                                            🏪 Dashboard Seller
+                                        </a>
+                                    @endif
+
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit"
@@ -141,8 +156,10 @@
                                     </form>
                                 </div>
                             </div>
-                        @else
-                            <!-- Guest Actions -->
+                        @endauth
+
+                        <!-- 🔑 Guest -->
+                        @guest
                             <div class="hidden sm:flex items-center space-x-3">
                                 <a href="{{ route('login') }}"
                                     class="text-black/90 hover:text-black font-medium text-sm transition-colors duration-200">
@@ -153,7 +170,7 @@
                                     Register
                                 </a>
                             </div>
-                        @endauth
+                        @endguest
 
                         <!-- Mobile Menu Button -->
                         <button class="lg:hidden p-2 text-black/90 hover:text-black">
@@ -162,10 +179,29 @@
                                     d="M4 6h16M4 12h16M4 18h16"></path>
                             </svg>
                         </button>
+
                     </div>
                 </div>
             </nav>
         </header>
+
+        @if (session('success'))
+            <div class="bg-green-100 text-green-700 p-3 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if (session('info'))
+            <div class="bg-blue-100 text-blue-700 p-3 rounded mb-4">
+                {{ session('info') }}
+            </div>
+        @endif
 
 
         <!-- Page Heading (optional) -->
@@ -340,6 +376,27 @@
         });
     </script>
     @yield('scripts')
+
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    <script>
+        const swiper = new Swiper(".swiper-main", {
+            spaceBetween: 10,
+            slidesPerView: 1,
+            loop: true,
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+            thumbs: {
+                swiper: {
+                    el: ".swiper-thumbs",
+                    slidesPerView: 5,
+                    spaceBetween: 10,
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

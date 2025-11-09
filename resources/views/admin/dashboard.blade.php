@@ -19,6 +19,10 @@
                 class="p-4 bg-yellow-600 text-white rounded-lg shadow hover:bg-yellow-700">
                 Kelola Pesanan
             </a>
+            <a href="{{ route('admin.sellers.index') }}"
+                class="p-4 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">
+                Kelola Akun Seller
+            </a>
         </div>
     </div>
 @endsection

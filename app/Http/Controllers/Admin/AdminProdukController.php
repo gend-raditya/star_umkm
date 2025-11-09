@@ -30,37 +30,41 @@ class AdminProdukController extends Controller
     /**
      * Simpan produk baru
      */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nama' => 'required',
-            'harga' => 'required|numeric',
-            'stok' => 'required|numeric',
-            'kategori_id' => 'required',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
-        ]);
+   public function store(Request $request)
+{
+    $validated = $request->validate([
+        'nama' => 'required|string',
+        'harga' => 'required|numeric',
+        'stok' => 'required|integer',
+        'deskripsi' => 'nullable|string',
+        'kategori_id' => 'required|integer',
+        'foto.*' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+    ]);
 
-        // Ambil data produk secara eksplisit
-        $data = [
-            'nama' => $request->nama,
-            'harga' => $request->harga,
-            'stok' => $request->stok,
-            'deskripsi' => $request->deskripsi,
-            'kategori_id' => $request->kategori_id,
-        ];
+    // Simpan produk dulu (kolom foto tetap boleh null)
+    $produk = Produk::create([
+        'nama' => $validated['nama'],
+        'harga' => $validated['harga'],
+        'stok' => $validated['stok'],
+        'deskripsi' => $validated['deskripsi'] ?? null,
+        'kategori_id' => $validated['kategori_id'],
+        'foto' => null, // optional, bisa tetap null
+    ]);
 
-        // Simpan file foto jika ada
-        if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('produk', 'public');
-            $data['foto'] = $path;
+    // Simpan foto jika ada
+    if ($request->hasFile('foto')) {
+        foreach ($request->file('foto') as $file) {
+            $path = $file->store('produk', 'public');
+            $produk->fotos()->create(['path' => $path]);
         }
-
-        Produk::create($data);
-
-        return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil ditambahkan');
     }
 
-    /**
+    return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil ditambahkan!');
+}
+
+
+
+/**
      * Tampilkan form edit produk
      */
     public function edit(Produk $produk)

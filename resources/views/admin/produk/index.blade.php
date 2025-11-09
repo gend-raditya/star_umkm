@@ -27,13 +27,20 @@
         <tr>
             <td class="p-2">{{ $p->nama }}</td>
             <td class="p-2">Rp {{ number_format($p->harga, 0, ',', '.') }}</td>
+
+            {{-- Tampilkan semua foto --}}
             <td class="p-2">
-                @if($p->foto)
-                    <img src="{{ asset('storage/' . $p->foto) }}" alt="Foto Produk" class="w-16 h-16 object-cover rounded">
+                @if($p->fotos->count() > 0)
+                    <div class="flex gap-1">
+                        @foreach($p->fotos as $foto)
+                            <img src="{{ asset('storage/' . $foto->path) }}" alt="Foto Produk" class="w-16 h-16 object-cover rounded">
+                        @endforeach
+                    </div>
                 @else
                     <span class="text-gray-400">Tidak ada foto</span>
                 @endif
             </td>
+
             <td class="p-2">{{ $p->stok }}</td>
             <td class="p-2">
                 <a href="{{ route('admin.produk.edit', $p->id) }}" class="text-blue-600">Edit</a> |

@@ -28,5 +28,28 @@
             @endforeach
         </tbody>
     </table>
+
+     {{-- ✅ Form Update Status --}}
+    <h2 class="text-xl font-bold mb-3">Ubah Status Pesanan</h2>
+    <form action="{{ route('admin.pesanan.update', $pesanan->id) }}" method="POST" class="flex items-center gap-3">
+        @csrf
+        @method('PUT')
+
+        <select name="status" class="border px-3 py-2 rounded">
+            <option value="Diproses" {{ $pesanan->status === 'Diproses' ? 'selected':'' }}>Diproses</option>
+            <option value="Dikirim" {{ $pesanan->status === 'Dikirim' ? 'selected':'' }}>Dikirim</option>
+            <option value="Selesai" {{ $pesanan->status === 'Selesai' ? 'selected':'' }}>Selesai</option>
+            <option value="Dibatalkan" {{ $pesanan->status === 'Dibatalkan' ? 'selected':'' }}>Dibatalkan</option>
+        </select>
+
+        <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            Update
+        </button>
+    </form>
+
+    <a href="{{ route('admin.pesanan.index') }}"
+       class="inline-block mt-6 text-blue-600 hover:underline">
+       ← Kembali ke daftar pesanan
+    </a>
 </div>
 @endsection

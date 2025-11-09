@@ -17,40 +17,72 @@
 
     <form action="{{ route('admin.produk.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
         @csrf
+
+        {{-- Nama Produk --}}
         <div>
-            <label class="block">Nama Produk</label>
+            <label class="block font-semibold">Nama Produk</label>
             <input type="text" name="nama" value="{{ old('nama') }}" class="w-full border rounded p-2" required>
+            @error('nama')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
         </div>
+
+        {{-- Harga --}}
         <div>
-            <label class="block">Harga</label>
+            <label class="block font-semibold">Harga</label>
             <input type="number" name="harga" value="{{ old('harga') }}" class="w-full border rounded p-2" required>
+            @error('harga')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
         </div>
+
+        {{-- Stok --}}
         <div>
-            <label class="block">Stok</label>
+            <label class="block font-semibold">Stok</label>
             <input type="number" name="stok" value="{{ old('stok') }}" class="w-full border rounded p-2" required>
+            @error('stok')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
         </div>
+
+        {{-- Deskripsi --}}
         <div>
-            <label class="block">Deskripsi</label>
+            <label class="block font-semibold">Deskripsi</label>
             <textarea name="deskripsi" class="w-full border rounded p-2">{{ old('deskripsi') }}</textarea>
+            @error('deskripsi')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
         </div>
+
+        {{-- Kategori --}}
         <div>
-            <label class="block">Kategori</label>
-            <select name="kategori_id" class="w-full border rounded p-2">
+            <label class="block font-semibold">Kategori</label>
+            <select name="kategori_id" class="w-full border rounded p-2" required>
                 @foreach ($kategoris as $kategori)
                     <option value="{{ $kategori->id }}" {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
                         {{ $kategori->nama }}
                     </option>
                 @endforeach
             </select>
+            @error('kategori_id')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
         </div>
 
-        <!-- Input Foto Produk (ubah name menjadi 'foto' jika hanya 1 file) -->
+        {{-- Foto Produk Multiple --}}
         <div>
-            <label class="block">Foto Produk</label>
-            <input type="file" name="foto" class="w-full border rounded p-2" accept="image/*">
+            <label class="block font-semibold">Foto Produk</label>
+            <input type="file" name="foto[]" class="w-full border rounded p-2" accept="image/*" multiple>
+            <p class="text-sm text-gray-500 mt-1">Pilih lebih dari 1 foto (format: JPG, PNG, GIF, maksimal 2MB per foto).</p>
+            @error('foto.*')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
         </div>
 
-        <button class="bg-green-600 text-white px-4 py-2 rounded">Simpan</button>
+        {{-- Submit --}}
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+            Simpan Produk
+        </button>
     </form>
 </div>
 @endsection

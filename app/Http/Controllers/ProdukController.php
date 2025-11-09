@@ -113,4 +113,12 @@ class ProdukController extends Controller
         $produk->delete();
         return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil dihapus');
     }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('q');
+        $produks = Produk::where('nama', 'like', '%' . $query . '%')->get();
+
+        return view('produk.index', compact('produks'));
+    }
 }
