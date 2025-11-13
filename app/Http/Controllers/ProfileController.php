@@ -26,7 +26,7 @@ class ProfileController extends Controller
     {
         $user = request()->user();
         return view('profile.update-password', compact('user'));
-}
+    }
 
     /**
      * Update the user's profile information.
@@ -39,20 +39,29 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'no_waSeller' => ['nullable', 'regex:/^[0-9]{9,15}$/'],
         ]);
 
-        $user->name = $request->name;
-        $user->email = $request->email;
+        // ✅ Simpan perubahan data user
+        $user->fill($request->only([
+            'name',
+            'email',
+            'no_waSeller', // tambahkan ini
+        ]));
+        // $user->name = $request->name;
+        // $user->email = $request->email;
 
-        if ($user->foto && Storage::exists($user->foto)) {
-            Storage::delete($user->foto);
+        if ($request->hasFile('foto')) {
+            if ($user->foto && Storage::exists('public/' . $user->foto)) {
+                Storage::delete('public/' . $user->foto);
+            }
+
+            $user->foto = $request->file('foto')->store('foto-profil', 'public');
         }
-        $user->foto = $request->file('foto')->store('foto-profil', 'public');
-
-
         $user->save();
 
-        return redirect()->back()->with('status', 'Profile berhasil diperbarui.');
+        return redirect()->back()->with('status', 'profile-updated');
+
     }
 
 

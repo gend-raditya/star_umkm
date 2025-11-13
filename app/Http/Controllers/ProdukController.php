@@ -25,11 +25,15 @@ class ProdukController extends Controller
     }
 
     // Detail produk
+    // Detail produk
     public function show($id)
     {
-        $produk = Produk::with('fotos')->findOrFail($id);
+        // tambahkan relasi user agar bisa akses no_waSeller
+        $produk = Produk::with(['fotos', 'user'])->findOrFail($id);
+
         return view('produk.show', compact('produk'));
     }
+
 
     // Admin - list produk
     public function adminIndex()

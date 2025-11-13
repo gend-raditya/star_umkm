@@ -23,6 +23,11 @@
                 class="p-4 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">
                 Kelola Akun Seller
             </a>
+            <a href="{{ route('admin.transaksi.index') }}"
+   class="p-4 bg-red-600 text-white rounded-lg shadow hover:bg-red-700">
+   Lihat Semua Transaksi
+</a>
+
         </div>
     </div>
 @endsection

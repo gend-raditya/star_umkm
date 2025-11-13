@@ -10,17 +10,17 @@ use App\Models\Kategori;
 class SellerProdukController extends Controller
 {
     // Tampilkan semua produk milik seller
-        public function index()
-{
-    $user = Auth::user();
+    public function index()
+    {
+        $user = Auth::user();
 
-    // tambahkan 'with' untuk load relasi fotos
-    $produk = Produk::with('fotos')
-        ->where('user_id', $user->id)
-        ->get();
+        // tambahkan 'with' untuk load relasi fotos
+        $produk = Produk::with('fotos')
+            ->where('user_id', $user->id)
+            ->get();
 
-    return view('seller.produk.index', compact('produk'));
-}
+        return view('seller.dashboard', compact('produk'));
+    }
 
 
     // Form tambah produk
@@ -59,7 +59,7 @@ class SellerProdukController extends Controller
             }
         }
 
-        return redirect()->route('seller.produk.index')
+        return redirect()->route('seller.dashboard')
             ->with('success', 'Produk berhasil ditambahkan.');
     }
 
@@ -70,7 +70,8 @@ class SellerProdukController extends Controller
     {
         $produk = Produk::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         $kategori = Kategori::all();
-        return view('seller.produk.edit', compact('produk', 'kategori'));
+         $user = Auth::user();
+        return view('seller.produk.edit', compact('produk', 'kategori','user'));
     }
 
     // Update produk
@@ -96,7 +97,7 @@ class SellerProdukController extends Controller
 
         $produk->update($data);
 
-        return redirect()->route('seller.produk.index')->with('success', 'Produk berhasil diperbarui.');
+        return redirect()->route('seller.dashboard')->with('success', 'Produk berhasil diperbarui.');
     }
 
     // Hapus produk
@@ -105,6 +106,19 @@ class SellerProdukController extends Controller
         $produk = Produk::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         $produk->delete();
 
-        return redirect()->route('seller.produk.index')->with('success', 'Produk berhasil dihapus.');
+        return redirect()->route('seller.dashboard')->with('success', 'Produk berhasil dihapus.');
+    }
+
+    public function updateStok(Request $request, $id)
+    {
+        $request->validate([
+            'stok' => 'required|integer|min:0',
+        ]);
+
+        $produk = Produk::findOrFail($id);
+        $produk->stok = $request->stok;
+        $produk->save();
+
+        return redirect()->back()->with('success', 'Stok berhasil diperbarui!');
     }
 }

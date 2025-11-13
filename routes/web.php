@@ -15,6 +15,8 @@ use App\Http\Controllers\SellerController;
 use App\Http\Controllers\SellerProdukController;
 use App\Http\Controllers\SellerPesananController;
 use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\Admin\AdminTransaksiController;
+use App\Http\Controllers\AlamatController;
 
 
 // ==================== Landing Page ====================
@@ -48,11 +50,16 @@ Route::middleware(['auth'])->group(function () {
 
     //riwayat pesanan
     Route::get('/riwayat-pesanan', [PesananController::class, 'riwayat'])
-    ->name('user.riwayat.pesanan');
+        ->name('user.riwayat.pesanan');
 
 
     //seller
     Route::post('/seller/register', [SellerController::class, 'register'])->name('seller.register');
+
+    Route::patch('/seller/produk/{id}/stok', [SellerProdukController::class, 'updateStok'])
+        ->name('seller.produk.updateStok');
+
+
 
     // ==================== Seller Routes ====================
     Route::prefix('seller')->name('seller.')->middleware(['auth'])->group(function () {
@@ -73,8 +80,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pesanan/{id}/update', [SellerPesananController::class, 'update'])->name('pesanan.update'); // ← untuk update status + lokasi terakhir
 
         Route::patch('/pesanan/{id}/update-resi', [SellerPesananController::class, 'updateResi'])
-    ->name('pesanan.updateResi');
-
+            ->name('pesanan.updateResi');
     });
 });
 
@@ -136,12 +142,25 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/sellers', [AdminSellerController::class, 'index'])->name('admin.sellers.index');
     Route::post('/admin/sellers/{id}/approve', [AdminSellerController::class, 'approve'])->name('admin.sellers.approve');
     Route::post('/admin/sellers/{id}/reject', [AdminSellerController::class, 'reject'])->name('admin.sellers.reject');
+    // Menampilkan daftar transaksi
+    Route::get('/admin/transaksi', [AdminTransaksiController::class, 'index'])
+        ->name('admin.transaksi.index');
+
+    // Menampilkan detail transaksi
+    Route::get('/admin/transaksi/{id}', [AdminTransaksiController::class, 'show'])
+        ->name('admin.transaksi.show');
 });
 
 //dashboar user
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
 });
+
+
+Route::get('/alamat/provinsi', [AlamatController::class, 'getProvinsi']);
+Route::get('/alamat/kota/{idProvinsi}', [AlamatController::class, 'getKota']);
+Route::get('/alamat/kecamatan/{idKota}', [AlamatController::class, 'getKecamatan']);
+Route::get('/alamat/kelurahan/{idKecamatan}', [AlamatController::class, 'getKelurahan']);
 
 // ==================== Auth Routes (Breeze Default) ====================
 require __DIR__ . '/auth.php';

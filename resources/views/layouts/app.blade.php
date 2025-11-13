@@ -74,18 +74,15 @@
                             class="text-black/90 hover:text-black font-medium transition-colors duration-200">Beranda</a>
                         <a href="{{ route('produk.index') }}"
                             class="text-black/90 hover:text-black font-medium transition-colors duration-200">Produk</a>
-                        <a href="#"
-                            class="text-black/90 hover:text-black font-medium transition-colors duration-200">Promo</a>
-                        <a href="#"
+                        {{-- <a href="#"
+                            class="text-black/90 hover:text-black font-medium transition-colors duration-200">Promo</a> --}}
+                        <a href="#tentang-kami"
                             class="text-black/90 hover:text-black font-medium transition-colors duration-200">Tentang
                             Kami</a>
                     </div>
 
                     <!-- Right Side -->
                     <div class="flex items-center space-x-4">
-
-
-
 
                         <!-- 🛒 Cart Icon (hanya muncul kalau user login) -->
                         @auth
@@ -185,26 +182,7 @@
             </nav>
         </header>
 
-        @if (session('success'))
-            <div class="bg-green-100 text-green-700 p-3 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if (session('info'))
-            <div class="bg-blue-100 text-blue-700 p-3 rounded mb-4">
-                {{ session('info') }}
-            </div>
-        @endif
-
-
-        <!-- Page Heading (optional) -->
+       <!-- Page Heading (optional) -->
         @isset($header)
             <div class="pt-20">
                 <div class="bg-white/10 glass shadow-lg border-b border-white/20">
@@ -222,9 +200,8 @@
 
 
         <!-- Modern Footer -->
-        {{-- <footer class="bg-white/10 glass border-t border-white/20 mt-auto"> --}}
-        {{-- <footer class="bg-white/10 glass shadow-lg mt-auto"> --}}
-        <footer class="bg-[rgba(167,196,188,0.95)] backdrop-blur-xl border-t border-white/20 shadow-lg mt-auto">
+
+        <footer id="tentang-kami" class="bg-[rgba(167,196,188,0.95)] backdrop-blur-xl border-t border-white/20 shadow-lg mt-auto">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <!-- Main Footer Content -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
@@ -341,7 +318,7 @@
                 <!-- Bottom Footer -->
                 <div class="border-t border-white/20 pt-8">
                     <div class="flex flex-col md:flex-row justify-between items-center">
-                        <p class="text-white/60 text-sm text-center md:text-left mb-4 md:mb-0">
+                        <p class="text-white/40 text-sm text-center md:text-left mb-4 md:mb-0">
                             &copy; {{ date('Y') }} Star UMKM. All rights reserved. | Memberdayakan UMKM lokal
                             dengan teknologi modern.
                         </p>

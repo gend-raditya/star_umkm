@@ -2,32 +2,30 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Atribut yang boleh diisi mass-assignment.
      *
-     * @var list<string>
+     * @var string[]
      */
     protected $fillable = [
         'name',
         'email',
         'password',
-
+        'no_waSeller',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * Atribut yang disembunyikan saat serialisasi.
      *
-     * @var list<string>
+     * @var string[]
      */
     protected $hidden = [
         'password',
@@ -35,9 +33,9 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Casting atribut tertentu ke tipe data spesifik.
      *
-     * @return array<string, string>
+     * @var array<string, string>
      */
     protected function casts(): array
     {
@@ -47,7 +45,9 @@ class User extends Authenticatable
         ];
     }
 
-    // 🔥 Relasi ke produk
+    /**
+     * Relasi: satu user bisa memiliki banyak produk.
+     */
     public function produk()
     {
         return $this->hasMany(\App\Models\Produk::class, 'user_id');
