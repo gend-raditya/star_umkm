@@ -101,9 +101,7 @@
                     </div>
                 </div>
 
-                <!-- Minuman -->
-                {{-- <div class="group relative bg-white/10 glass rounded-3xl p-8 text-center hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-2"> --}}
-                {{-- <div class="group relative bg-white/10 glass rounded-3xl p-8 text-center hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-2 shadow-xl border border-white/20"> --}}
+                
                 <div
                     class="group relative bg-white/50 glass rounded-3xl p-8 text-center
             hover:bg-white/70 transition-all duration-300 transform hover:-translate-y-2
@@ -130,9 +128,7 @@
                     </div>
                 </div>
 
-                <!-- Kerajinan -->
-                {{-- <div class="group relative bg-white/10 glass rounded-3xl p-8 text-center hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-2"> --}}
-                {{-- <div class="group relative bg-white/10 glass rounded-3xl p-8 text-center hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-2 shadow-xl border border-white/20"> --}}
+
                 <div
                     class="group relative bg-white/50 glass rounded-3xl p-8 text-center
             hover:bg-white/70 transition-all duration-300 transform hover:-translate-y-2

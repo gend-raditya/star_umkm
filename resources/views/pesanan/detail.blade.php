@@ -11,10 +11,18 @@
             {{-- Badge Status --}}
             <p>
                 <strong>Status:</strong>
-                <span class="px-2 py-1 rounded text-white text-sm
-                    {{ $pesanan->status === 'Selesai' ? 'bg-green-500' : ($pesanan->status === 'Dikirim' ? 'bg-yellow-500' : 'bg-blue-500') }}">
+                <span
+                    class="px-2 py-1 rounded text-white text-sm
+    {{ $pesanan->status === 'Selesai'
+        ? 'bg-green-500'
+        : ($pesanan->status === 'Dikirim'
+            ? 'bg-yellow-500'
+            : ($pesanan->status === 'Dibatalkan'
+                ? 'bg-red-500'
+                : 'bg-blue-500')) }}">
                     {{ ucfirst($pesanan->status) }}
                 </span>
+
             </p>
 
             <p><strong>Total:</strong> Rp {{ number_format($pesanan->total, 0, ',', '.') }}</p>
@@ -30,7 +38,7 @@
                         📦 <strong>Ekspedisi:</strong> {{ strtoupper($pesanan->ekspedisi) }}
                     </p>
                     <a href="https://cekresi.com/?noresi={{ $pesanan->no_resi }}" target="_blank"
-                       class="text-purple-600 hover:underline text-sm">
+                        class="text-purple-600 hover:underline text-sm">
                         🔍 Lacak Pengiriman
                     </a>
                 </div>
@@ -61,11 +69,22 @@
                 @endforeach
             </tbody>
         </table>
+        {{-- Tombol Batalkan Pesanan (jika status masih Diproses) --}}
+        @if ($pesanan->status === 'Diproses')
+            <form action="{{ route('pesanan.batalkan', $pesanan->id) }}" method="POST" class="mt-4">
+                @csrf
+                @method('PUT')
+                <button type="submit" onclick="return confirm('Yakin ingin membatalkan pesanan ini?');"
+                    class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                    Batalkan Pesanan
+                </button>
+            </form>
+        @endif
+
 
         {{-- Tombol Kembali --}}
-        <a href="{{ route('pesanan.saya') }}"
-           class="mt-6 inline-block text-purple-600 hover:underline">
-           ← Kembali ke Riwayat
+        <a href="{{ route('pesanan.saya') }}" class="mt-6 inline-block text-purple-600 hover:underline">
+            ← Kembali ke Riwayat
         </a>
     </div>
 @endsection

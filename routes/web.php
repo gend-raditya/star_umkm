@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\AdminTransaksiController;
 use App\Http\Controllers\AlamatController;
 
 
+
 // ==================== Landing Page ====================
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 Route::get('/home', [LandingPageController::class, 'index'])->name('home');
@@ -61,6 +62,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 
+
+
     // ==================== Seller Routes ====================
     Route::prefix('seller')->name('seller.')->middleware(['auth'])->group(function () {
         // Dashboard
@@ -82,6 +85,12 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/pesanan/{id}/update-resi', [SellerPesananController::class, 'updateResi'])
             ->name('pesanan.updateResi');
     });
+});
+//isi data seller
+Route::middleware(['auth'])->group(function () {
+    Route::get('/seller/register', [SellerController::class, 'create'])->name('seller.create');
+    Route::post('/seller/register', [SellerController::class, 'store'])->name('seller.store');
+    Route::post('/seller/register', [SellerController::class, 'store'])->name('seller.store');
 });
 
 // Cek status pesanan (tanpa login)
@@ -109,6 +118,8 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::resource('kategori', AdminKategoriController::class);
     Route::resource('pesanan', AdminPesananController::class);
 });
+
+
 
 // ==================== Breeze Auth (User) ====================
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -157,10 +168,27 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+
 Route::get('/alamat/provinsi', [AlamatController::class, 'getProvinsi']);
 Route::get('/alamat/kota/{idProvinsi}', [AlamatController::class, 'getKota']);
 Route::get('/alamat/kecamatan/{idKota}', [AlamatController::class, 'getKecamatan']);
 Route::get('/alamat/kelurahan/{idKecamatan}', [AlamatController::class, 'getKelurahan']);
+
+//melihat daftar seller
+Route::get('/admin/sellers/approved', [AdminSellerController::class, 'approved'])
+    ->name('admin.sellers.approved')
+    ->middleware('admin');
+
+
+//notif ke midtrans
+Route::post('/midtrans/callback', [PesananController::class, 'callback']);
+
+
+//batalkan pesanan
+Route::put('/pesanan/{id}/batalkan', [PesananController::class, 'batalkan'])
+    ->name('pesanan.batalkan');
+
+
 
 // ==================== Auth Routes (Breeze Default) ====================
 require __DIR__ . '/auth.php';

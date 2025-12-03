@@ -10,46 +10,38 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * Atribut yang boleh diisi mass-assignment.
-     *
-     * @var string[]
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
+
+        // tambahkan ini bila ada di database
+        'is_seller',
+        'seller_status',
         'no_waSeller',
     ];
 
-    /**
-     * Atribut yang disembunyikan saat serialisasi.
-     *
-     * @var string[]
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Casting atribut tertentu ke tipe data spesifik.
-     *
-     * @var array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_seller' => 'boolean',
         ];
     }
 
-    /**
-     * Relasi: satu user bisa memiliki banyak produk.
-     */
     public function produk()
     {
         return $this->hasMany(\App\Models\Produk::class, 'user_id');
+    }
+
+    public function seller()
+    {
+        return $this->hasOne(Seller::class);
     }
 }

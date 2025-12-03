@@ -3,16 +3,19 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Seller;
 use App\Models\User;
 use Illuminate\Http\Request;
 
 class AdminSellerController extends Controller
 {
-     public function index()
+    public function index()
     {
-        // Hanya tampilkan user yang sudah mengajukan jadi seller (status pending)
-        $sellers = User::whereNotNull('seller_status')
-            ->where('seller_status', 'pending')
+        // Ambil semua seller yang baru daftar (pending)
+        $sellers = Seller::with('user')
+            ->whereHas('user', function ($q) {
+                $q->where('seller_status', 'pending');
+            })
             ->get();
 
         return view('admin.sellers.index', compact('sellers'));
@@ -36,5 +39,15 @@ class AdminSellerController extends Controller
         $user->save();
 
         return back()->with('info', 'Pengajuan seller ditolak.');
+    }
+    //melihat daftar seller yg disetujui
+    public function approved()
+    {
+        // Ambil SEMUA seller yang sudah disetujui
+        $sellers = \App\Models\Seller::whereHas('user', function ($q) {
+            $q->where('seller_status', 'approved');
+        })->with('user')->get();
+
+        return view('admin.sellers.approved', compact('sellers'));
     }
 }

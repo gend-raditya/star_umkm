@@ -10,7 +10,7 @@
             <table class="w-full border-collapse">
                 <thead>
                     <tr class="bg-purple-100 text-left">
-                        <th class="p-2">Invoice</th>
+                        <th class="p-2">No Pesanan</th>
                         <th class="p-2">Total</th>
                         <th class="p-2">Status</th>
                         <th class="p-2">Tanggal</th>

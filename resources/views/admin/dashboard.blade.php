@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="p-6 bg-white rounded-lg shadow mt-20">
-         <h1 class="text-2xl font-bold mb-4 pt-10">Dashboard Admin</h1>
+        <h1 class="text-2xl font-bold mb-4 pt-10">Dashboard Admin</h1>
 
         <p>Selamat datang di dashboard admin ⭐</p>
 
@@ -23,10 +23,15 @@
                 class="p-4 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">
                 Kelola Akun Seller
             </a>
+            <a href="{{ route('admin.sellers.approved') }}"
+                class="p-4 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
+                Daftar Seller Aktif
+            </a>
+
             <a href="{{ route('admin.transaksi.index') }}"
-   class="p-4 bg-red-600 text-white rounded-lg shadow hover:bg-red-700">
-   Lihat Semua Transaksi
-</a>
+                class="p-4 bg-red-600 text-white rounded-lg shadow hover:bg-red-700">
+                Lihat Semua Transaksi
+            </a>
 
         </div>
     </div>

@@ -10,6 +10,12 @@
             {{ session('success') }}
         </div>
     @endif
+    @foreach (auth()->user()->notifications as $notif)
+        <div class="p-3 mb-2 bg-green-100 border-l-4 border-green-600 rounded">
+            {{ $notif->data['message'] }}
+        </div>
+    @endforeach
+
 
     @if (session('error'))
         <div id="flash-message"

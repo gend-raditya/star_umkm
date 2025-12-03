@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Models\Seller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -62,5 +62,45 @@ class SellerController extends Controller
         }
 
         return back()->with('info', 'Anda sudah mengajukan sebelumnya.');
+    }
+    public function create()
+    {
+        return view('seller.register');
+    }
+
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'nama_seller' => 'required|string|max:255',
+            'foto_toko' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+            'nomor_hp' => 'required|string|max:20',
+            'jenis_rekening' => 'required|string|max:50',
+            'nomor_rekening' => 'required|string|max:50',
+        ]);
+
+        $path = null;
+        if ($request->hasFile('foto_toko')) {
+            $path = $request->file('foto_toko')->store('foto_toko', 'public');
+        }
+
+        // Simpan ke tabel sellers
+        Seller::create([
+            'user_id' => Auth::id(),
+            'nama_seller' => $validated['nama_seller'],
+            'foto_toko' => $path,
+            'nomor_hp' => $validated['nomor_hp'],
+            'jenis_rekening' => $validated['jenis_rekening'],
+            'nomor_rekening' => $validated['nomor_rekening'],
+        ]);
+
+        // UPDATE STATUS USER (WAJIB)
+        $user = Auth::user();
+        $user->seller_status = 'pending';
+        $user->is_seller = false;
+        $user->save();
+
+        return redirect()->route('user.dashboard')
+            ->with('success', 'Data seller berhasil dikirim! Tunggu persetujuan admin.');
     }
 }

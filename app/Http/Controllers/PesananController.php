@@ -9,6 +9,9 @@ use App\Models\Keranjang;
 use App\Models\Pesanan;
 use App\Models\PesananItem;
 use App\Services\MidtransService;
+use App\Notifications\PesananPaidNotification;
+use Illuminate\Support\Facades\Log;
+
 
 class PesananController extends Controller
 {
@@ -237,5 +240,108 @@ class PesananController extends Controller
     {
         $pesanan = Pesanan::where('status', 'selesai')->get();
         return view('user.riwayat', compact('pesanan'));
+    }
+
+    //notif ke wa
+    private function kirimWaSeller($no, $pesanan)
+    {
+        $token = env('FONNTE_TOKEN');
+        $pesan = "
+🔔 *Pesanan Baru Dibayar!*
+
+ID Pesanan: {$pesanan->id}
+Total: Rp " . number_format($pesanan->total, 0, ',', '.') . "
+Nama Pemesan: {$pesanan->nama_pemesan}
+
+Silakan segera proses ya.
+    ";
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => 'https://api.fonnte.com/send',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => [
+                'target' => $no,
+                'message' => $pesan,
+            ],
+            CURLOPT_HTTPHEADER => [
+                "Authorization: $token"
+            ]
+        ]);
+
+        $res = curl_exec($curl);
+        curl_close($curl);
+
+        return $res;
+    }
+
+    public function callback(Request $request)
+    {
+        $notif = $request->all();
+
+        $order_id = $notif['order_id'];
+        $status = $notif['transaction_status'];
+
+        $pesanan = Pesanan::where('kode_pesanan', $order_id)->first();
+
+        if (!$pesanan) {
+            Log::error("⚠ PESANAN TIDAK DITEMUKAN: $order_id");
+            return response()->json(['message' => 'Pesanan tidak ditemukan'], 404);
+        }
+
+        Log::info("Pesanan:", [$pesanan]);
+        Log::info("Items:", $pesanan->items->toArray());
+
+        $item = $pesanan->items->first();
+
+        if (!$item) {
+            Log::error("⚠ PESANAN TIDAK PUNYA ITEM!");
+            return;
+        }
+
+        if (!$item->produk) {
+            Log::error("⚠ PRODUK ITEM TIDAK DITEMUKAN!");
+            return;
+        }
+
+        if (!$item->produk->seller) {
+            Log::error("⚠ PRODUK TIDAK PUNYA SELLER!");
+            return;
+        }
+
+        $seller = $item->produk->seller;
+
+        if ($status == 'capture' || $status == 'settlement') {
+            $pesanan->status = 'paid';
+            $pesanan->save();
+
+            $seller->notify(new PesananPaidNotification($pesanan));
+            $this->kirimWaSeller($seller->telepon, $pesanan);
+        }
+
+        return response()->json(['message' => 'OK']);
+    }
+
+    /**
+     * ✅ Batalkan pesanan
+     */
+    public function batalkan($id)
+    {
+        $pesanan = Pesanan::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Hanya bisa dibatalkan kalau status masih Diproses
+        if ($pesanan->status !== 'Diproses') {
+            return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan.');
+        }
+
+        $pesanan->update([
+            'status' => 'Dibatalkan'
+        ]);
+
+        return redirect()->route('pesanan.saya')->with('success', 'Pesanan berhasil dibatalkan.');
     }
 }
