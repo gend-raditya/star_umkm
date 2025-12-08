@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'binderbyte' => [
+        'base_url' => 'https://api.binderbyte.com',
+        'api_key' => env('BINDERBYTE_API_KEY'),
+    ],
+
+
 ];

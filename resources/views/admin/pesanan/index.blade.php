@@ -21,7 +21,7 @@
                 <td class="p-2 border">Rp {{ number_format($pesanan->total) }}</td>
                 <td class="p-2 border">{{ $pesanan->status }}</td>
                 <td class="p-2 border">
-                    <a href="{{ route('pesanan.show', $pesanan->id) }}" class="bg-blue-600 px-2 py-1 rounded text-white">Detail</a>
+                    <a href="{{ route('admin.pesanan.show', $pesanan->id) }}" class="bg-blue-600 px-2 py-1 rounded text-white">Detail</a>
                 </td>
             </tr>
             @endforeach

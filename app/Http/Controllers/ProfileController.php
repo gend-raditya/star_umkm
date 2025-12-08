@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -21,21 +22,49 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function editPassword()
+    {
+        $user = request()->user();
+        return view('profile.update-password', compact('user'));
+    }
+
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request)
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'no_waSeller' => ['nullable', 'regex:/^[0-9]{9,15}$/'],
+        ]);
+
+        // ✅ Simpan perubahan data user
+        $user->fill($request->only([
+            'name',
+            'email',
+            'no_waSeller', // tambahkan ini
+        ]));
+        // $user->name = $request->name;
+        // $user->email = $request->email;
+
+        if ($request->hasFile('foto')) {
+            if ($user->foto && Storage::exists('public/' . $user->foto)) {
+                Storage::delete('public/' . $user->foto);
+            }
+
+            $user->foto = $request->file('foto')->store('foto-profil', 'public');
         }
+        $user->save();
 
-        $request->user()->save();
+        return redirect()->back()->with('status', 'profile-updated');
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
+
+
 
     /**
      * Delete the user's account.

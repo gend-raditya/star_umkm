@@ -25,11 +25,15 @@ class ProdukController extends Controller
     }
 
     // Detail produk
+    // Detail produk
     public function show($id)
     {
-        $produk = Produk::with('fotos')->findOrFail($id);
+        // tambahkan relasi user agar bisa akses no_waSeller
+        $produk = Produk::with(['fotos', 'user'])->findOrFail($id);
+
         return view('produk.show', compact('produk'));
     }
+
 
     // Admin - list produk
     public function adminIndex()
@@ -112,5 +116,13 @@ class ProdukController extends Controller
         $produk = Produk::findOrFail($id);
         $produk->delete();
         return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil dihapus');
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('q');
+        $produks = Produk::where('nama', 'like', '%' . $query . '%')->get();
+
+        return view('produk.index', compact('produks'));
     }
 }

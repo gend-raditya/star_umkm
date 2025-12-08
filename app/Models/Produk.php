@@ -9,16 +9,38 @@ class Produk extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nama', 'deskripsi','stok', 'harga', 'kategori_id'];
+    /**
+     * Kolom yang bisa diisi mass-assignment.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'nama',
+        'harga',
+        'stok',
+        'deskripsi',
+        'kategori_id',
+        'foto',
+        'user_id',
+    ];
 
-    public function kategori()
+    /**
+     * Relasi: Produk memiliki banyak foto.
+     */
+    public function fotos()
     {
-        return $this->belongsTo(Kategori::class);
+        return $this->hasMany(FotoProduk::class);
     }
 
-     public function fotos()
+    /**
+     * Relasi: Produk dimiliki oleh satu user (seller).
+     */
+    public function seller()
     {
-        return $this->hasMany(Foto::class);
+        return $this->belongsTo(User::class, 'user_id');
+    }
+     public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
-

@@ -3,60 +3,345 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Produk;
 use App\Models\Keranjang;
+use App\Models\Pesanan;
+use App\Models\PesananItem;
+use App\Services\MidtransService;
+use App\Notifications\PesananPaidNotification;
+use Illuminate\Support\Facades\Log;
+
 
 class PesananController extends Controller
 {
-    // 👉 Tambah ke Keranjang
-    public function tambahKeranjang(Request $request, $id)
+    /**
+     * ✅ Halaman checkout (menampilkan data dari keranjang atau single produk)
+     */
+    public function checkout(Request $request)
     {
-        // Cari produk berdasarkan ID
-        $produk = Produk::findOrFail($id);
+        $user = Auth::user();
 
-        // Simpan ke keranjang (contoh pake session / tabel keranjang)
-        $keranjang = session()->get('keranjang', []);
+        // 🟢 Jika ada parameter id → checkout langsung 1 produk
+        if ($request->has('id')) {
+            $produk = Produk::findOrFail($request->id);
+            $jumlah = $request->jumlah ?? 1;
 
-        if (isset($keranjang[$id])) {
-            // kalau produk sudah ada, tambahkan qty
-            $keranjang[$id]['qty']++;
-        } else {
-            // kalau produk belum ada, masukkan baru
-            $keranjang[$id] = [
-                "nama"   => $produk->nama,
-                "harga"  => $produk->harga,
-                "gambar" => $produk->gambar,
-                "qty"    => 1
-            ];
+            $keranjang = collect([
+                (object)[
+                    'produk' => $produk,
+                    'jumlah' => $jumlah,
+                    'subtotal' => $produk->harga * $jumlah,
+                ]
+            ]);
+            $total = $produk->harga * $jumlah;
         }
 
-        session()->put('keranjang', $keranjang);
+        // 🟢 Jika checkout dari keranjang (pakai pilihan produk)
+        elseif ($request->has('produk_id')) {
+            $produkIds = $request->input('produk_id', []);
+            $jumlahs = $request->input('jumlah', []);
 
-        // Redirect ke halaman checkout
-        return redirect()->route('checkout')
-                         ->with('success', 'Produk berhasil ditambahkan ke keranjang!');
+            $keranjang = collect();
+            $total = 0;
+
+            foreach ($produkIds as $id) {
+                $produk = Produk::findOrFail($id);
+                $jumlah = $jumlahs[$id] ?? 1;
+                $subtotal = $produk->harga * $jumlah;
+                $total += $subtotal;
+
+                $keranjang->push((object)[
+                    'produk' => $produk,
+                    'jumlah' => $jumlah,
+                    'subtotal' => $subtotal,
+                ]);
+            }
+        }
+
+        // 🟢 Default: tampilkan semua produk di keranjang
+        else {
+            $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
+            $total = $keranjang->sum(fn($item) => $item->produk->harga * $item->jumlah);
+        }
+
+        return view('pesanan.checkout', compact('keranjang', 'total'));
     }
 
-    // 👉 Halaman Checkout
-    public function checkout()
+    /**
+     * ✅ Proses checkout (buat pesanan dan kirim ke Midtrans)
+     */
+    public function prosesCheckout(Request $request, MidtransService $midtrans)
     {
-        $keranjang = session('keranjang', []);
-        return view('pesanan.checkout', compact('keranjang'));
+        $user = Auth::user();
+        $invoice = 'INV-' . strtoupper(uniqid());
+
+        // 🟢 CASE 1: Checkout langsung 1 produk
+        if ($request->has('produk_id') && !is_array($request->produk_id)) {
+            $produk = Produk::findOrFail($request->produk_id);
+            $jumlah = (int)$request->jumlah;
+            $total = $produk->harga * $jumlah;
+        }
+
+        // 🟢 CASE 2: Checkout beberapa produk dari keranjang (checkbox)
+        elseif (is_array($request->produk_id)) {
+            $produkIds = $request->input('produk_id', []);
+            $jumlahs = $request->input('jumlah', []);
+
+            $total = 0;
+            $produkList = [];
+
+            foreach ($produkIds as $id) {
+                $produk = Produk::findOrFail($id);
+                $jumlah = $jumlahs[$id] ?? 1;
+                $subtotal = $produk->harga * $jumlah;
+                $total += $subtotal;
+
+                $produkList[] = [
+                    'produk' => $produk,
+                    'jumlah' => $jumlah,
+                    'subtotal' => $subtotal,
+                ];
+            }
+        }
+
+        // 🟢 CASE 3: Checkout semua isi keranjang
+        else {
+            $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
+            if ($keranjang->isEmpty()) {
+                return response()->json(['error' => 'Keranjang kosong!'], 400);
+            }
+
+            $total = $keranjang->sum(fn($item) => $item->produk->harga * $item->jumlah);
+            $produkList = $keranjang->map(function ($item) {
+                return [
+                    'produk' => $item->produk,
+                    'jumlah' => $item->jumlah,
+                    'subtotal' => $item->produk->harga * $item->jumlah,
+                ];
+            })->toArray();
+        }
+
+        // 🧮 Validasi total
+        if ((int)$request->total !== (int)$total) {
+            return response()->json(['error' => 'Total tidak sesuai!'], 400);
+        }
+
+        // 🧾 Buat pesanan
+        $pesanan = Pesanan::create([
+            'user_id' => $user->id,
+            'invoice' => $invoice,
+            'nama' => $request->nama_pemesan ?? $user->name,
+            'no_hp' => $request->telepon,
+            'alamat' => $request->alamat,
+            'total' => $total,
+            'status' => 'Diproses',
+        ]);
+
+        // 💾 Simpan item pesanan
+        foreach ($produkList ?? [compact('produk', 'jumlah', 'subtotal')] as $item) {
+            PesananItem::create([
+                'pesanan_id' => $pesanan->id,
+                'produk_id'  => $item['produk']->id,
+                'jumlah'     => $item['jumlah'],
+                'subtotal'   => $item['subtotal'],
+            ]);
+        }
+
+        // 🧹 Hapus dari keranjang setelah checkout
+        Keranjang::where('user_id', $user->id)
+            ->whereIn('produk_id', $request->produk_id ?? [])
+            ->delete();
+
+        // 💳 Buat transaksi Midtrans
+        $snapToken = $midtrans->createTransaction(
+            $invoice,
+            $total,
+            [
+                'first_name' => $request->nama_pemesan ?? $user->name ?? 'Guest',
+                'email'      => $user->email ?? 'guest@example.com',
+            ]
+        );
+
+        return response()->json(['snap_token' => $snapToken]);
     }
 
-    // 👉 Proses Checkout
-    public function prosesCheckout(Request $request)
+    /**
+     * ✅ Halaman pesanan sukses
+     */
+    public function success()
     {
-        // proses simpan ke DB pesanan nanti di sini
-        session()->forget('keranjang');
+        $user = Auth::user();
 
-        return redirect()->route('checkout.proses')
-                         ->with('success', 'Pesanan berhasil dibuat!');
+        $pesanan = Pesanan::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('pesanan.success', compact('pesanan'));
     }
 
-    // 👉 Cek Pesanan
-    public function cekPesanan()
+    /**
+     * ✅ Checkout satu produk (halaman manual)
+     */
+    public function checkoutSinglePage($id, $jumlah = 1)
     {
-        return view('pesanan.cek');
+        $produk = Produk::findOrFail($id);
+        return view('pesanan.checkout_single', compact('produk', 'jumlah'));
+    }
+
+    /**
+     * ✅ Proses checkout satu produk manual
+     */
+    public function checkoutSingleProcess(Request $request, MidtransService $midtrans)
+    {
+        $produk = Produk::findOrFail($request->produk_id);
+        $jumlah = (int)$request->jumlah;
+        $total = $produk->harga * $jumlah;
+
+        $snapToken = $midtrans->createTransaction(
+            'ORDER-' . time(),
+            $total,
+            [
+                'first_name' => $request->nama_pemesan ?? 'Guest',
+                'email'      => Auth::user()->email ?? 'guest@example.com',
+            ]
+        );
+
+        return response()->json(['snap_token' => $snapToken]);
+    }
+
+    /**
+     * ✅ Daftar semua pesanan user
+     */
+    public function pesananSaya()
+    {
+        $user = Auth::user();
+
+        $pesanans = Pesanan::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('pesanan.saya', compact('pesanans'));
+    }
+
+    /**
+     * ✅ Detail pesanan
+     */
+    public function detailPesanan($id)
+    {
+        $pesanan = Pesanan::with(['items.produk'])
+            ->where('user_id', Auth::id())
+            ->findOrFail($id);
+
+        return view('pesanan.detail', compact('pesanan'));
+    }
+
+    public function riwayat()
+    {
+        $pesanan = Pesanan::where('status', 'selesai')->get();
+        return view('user.riwayat', compact('pesanan'));
+    }
+
+    //notif ke wa
+    private function kirimWaSeller($no, $pesanan)
+    {
+        $token = env('FONNTE_TOKEN');
+        $pesan = "
+🔔 *Pesanan Baru Dibayar!*
+
+ID Pesanan: {$pesanan->id}
+Total: Rp " . number_format($pesanan->total, 0, ',', '.') . "
+Nama Pemesan: {$pesanan->nama_pemesan}
+
+Silakan segera proses ya.
+    ";
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => 'https://api.fonnte.com/send',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => [
+                'target' => $no,
+                'message' => $pesan,
+            ],
+            CURLOPT_HTTPHEADER => [
+                "Authorization: $token"
+            ]
+        ]);
+
+        $res = curl_exec($curl);
+        curl_close($curl);
+
+        return $res;
+    }
+
+    public function callback(Request $request)
+    {
+        $notif = $request->all();
+
+        $order_id = $notif['order_id'];
+        $status = $notif['transaction_status'];
+
+        $pesanan = Pesanan::where('kode_pesanan', $order_id)->first();
+
+        if (!$pesanan) {
+            Log::error("⚠ PESANAN TIDAK DITEMUKAN: $order_id");
+            return response()->json(['message' => 'Pesanan tidak ditemukan'], 404);
+        }
+
+        Log::info("Pesanan:", [$pesanan]);
+        Log::info("Items:", $pesanan->items->toArray());
+
+        $item = $pesanan->items->first();
+
+        if (!$item) {
+            Log::error("⚠ PESANAN TIDAK PUNYA ITEM!");
+            return;
+        }
+
+        if (!$item->produk) {
+            Log::error("⚠ PRODUK ITEM TIDAK DITEMUKAN!");
+            return;
+        }
+
+        if (!$item->produk->seller) {
+            Log::error("⚠ PRODUK TIDAK PUNYA SELLER!");
+            return;
+        }
+
+        $seller = $item->produk->seller;
+
+        if ($status == 'capture' || $status == 'settlement') {
+            $pesanan->status = 'paid';
+            $pesanan->save();
+
+            $seller->notify(new PesananPaidNotification($pesanan));
+            $this->kirimWaSeller($seller->telepon, $pesanan);
+        }
+
+        return response()->json(['message' => 'OK']);
+    }
+
+    /**
+     * ✅ Batalkan pesanan
+     */
+    public function batalkan($id)
+    {
+        $pesanan = Pesanan::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Hanya bisa dibatalkan kalau status masih Diproses
+        if ($pesanan->status !== 'Diproses') {
+            return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan.');
+        }
+
+        $pesanan->update([
+            'status' => 'Dibatalkan'
+        ]);
+
+        return redirect()->route('pesanan.saya')->with('success', 'Pesanan berhasil dibatalkan.');
     }
 }
