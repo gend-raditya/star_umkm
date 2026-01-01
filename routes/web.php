@@ -23,6 +23,8 @@ use App\Http\Controllers\AlamatController;
 // ==================== Landing Page ====================
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 Route::get('/home', [LandingPageController::class, 'index'])->name('home');
+Route::get('/galeri', [LandingPageController::class, 'galeri'])->name('galeri');
+Route::get('/tentang-kami', [LandingPageController::class, 'tentang'])->name('tentang');
 
 // ==================== Produk & Kategori ====================
 //cari produk

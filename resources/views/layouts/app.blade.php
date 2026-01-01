@@ -78,9 +78,13 @@
                                 class="text-black/90 hover:text-black font-medium transition-colors duration-200">Produk</a>
                             {{-- <a href="#"
                             class="text-black/90 hover:text-black font-medium transition-colors duration-200">Promo</a> --}}
-                            <a href="#tentang-kami"
+                            <a href="{{ route('tentang') }}"
                                 class="text-black/90 hover:text-black font-medium transition-colors duration-200">Tentang
                                 Kami</a>
+                            <a href="{{ route('galeri') }}"
+                                class="text-black/90 hover:text-black font-medium transition-colors duration-200">Galeri</a>
+                            {{-- <a href="{{ route('produk.index') }}"
+                                class="text-black/90 hover:text-black font-medium transition-colors duration-200">Produk</a> --}}
                         </div>
 
                         <!-- Right Side -->

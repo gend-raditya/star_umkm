@@ -13,4 +13,14 @@ class LandingPageController extends Controller
 
         return view('landing_page', compact('produkTerbaru'));
     }
+
+    public function galeri()
+    {
+        return view('user.galeri');
+    }
+
+    public function tentang()
+    {
+        return view('user.tentang');
+    }
 }
