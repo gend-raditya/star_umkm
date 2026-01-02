@@ -50,8 +50,27 @@
     </style>
 </head>
 
-<body class="font-sans antialiased bg-main-gradient min-h-screen">
-    <div x-data="{ open: false, openSellerModal: false }">
+{{-- <body class="font-sans antialiased bg-main-gradient min-h-screen text-stone-800">
+    <div x-data="{
+        open: false,
+        openSellerModal: false,
+        authOpen: {{ $errors->any() ? 'true' : 'false' }},
+        isLogin: {{ $errors->has('name') ? 'false' : 'true' }}
+    }"> --}}
+
+<body class="font-sans antialiased bg-main-gradient min-h-screen text-stone-800">
+    <div x-data="{
+        open: false,
+        openSellerModal: false,
+
+        @guest
+            authOpen: {{ $errors->any() || session('success') ? 'true' : 'false' }},
+        @else
+            authOpen: false, {{-- Kalau sudah login, modal auth tutup --}}
+        @endguest
+
+        isLogin: {{ session('success') || !$errors->has('name') ? 'true' : 'false' }}
+    }">
 
 
         <div class="min-h-screen flex flex-col">
@@ -161,15 +180,16 @@
 
                             <!-- 🔑 Guest -->
                             @guest
-                                <div class="hidden sm:flex items-center space-x-3">
-                                    <a href="{{ route('login') }}"
-                                        class="text-black/90 hover:text-black font-medium text-sm transition-colors duration-200">
+                                <div class="hidden sm:flex items-center space-x-3 mr-12">
+                                    <button @click="authOpen = true; isLogin = true"
+                                    class="text-black font-medium px-4 py-2 rounded-full hover:bg-white/100 transition-all duration-200 text-sm">
                                         Login
-                                    </a>
-                                    <a href="{{ route('register') }}"
-                                        class="bg-white/20 text-black px-4 py-2 rounded-full hover:bg-white/30 transition-all duration-200 text-sm font-medium">
+                                    </button>
+
+                                    <button @click="authOpen = true; isLogin = false"
+                                    class="text-black px-4 py-2 rounded-full hover:bg-white/100 transition-all duration-200 text-sm font-medium border border-white/100">
                                         Register
-                                    </a>
+                                    </button>
                                 </div>
                             @endguest
 
@@ -204,12 +224,12 @@
 
 
             {{-- Flash Message --}}
-            @if (session('success'))
+            {{-- @if (session('success'))
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" x-transition
                     class="fixed top-24 right-5 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
                     {{ session('success') }}
                 </div>
-            @endif
+            @endif --}}
 
             @if (session('error'))
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition
@@ -367,6 +387,8 @@
                 </div>
             </footer>
         </div>
+
+        @include('layouts.partials.auth-modal')
 
         <!-- Scripts -->
         <script>

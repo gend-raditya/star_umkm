@@ -43,8 +43,12 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
+        // Auth::login($user);
 
-        return redirect()->route('produk.index');
+        // return redirect()->route('produk.index');
+
+        // 2. Redirect kembali ke halaman sebelumnya (Home) dengan pesan sukses
+        // Kita arahkan ke 'home' atau '/' karena modal login ada di sana
+        return redirect()->route('home')->with('success', 'Registrasi berhasil! Silakan login dengan akun baru Anda.');
     }
 }

@@ -188,7 +188,7 @@
                                         </a>
                                     @endauth
                                     @guest
-                                        <a href="{{ route('register') }}"
+                                        <button @click="authOpen = true; isLogin = true"
                                             class="flex-1 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white px-6 py-3 rounded-lg font-semibold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-2 group">
                                             <svg class="w-5 h-5 group-hover:animate-bounce" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -197,16 +197,17 @@
                                                 </path>
                                             </svg>
                                             <span>Tambah ke Keranjang</span>
-                                        </a>
-                                        <a href="{{ route('register') }}"
+                                        </button>
+
+                                        <button @click="authOpen = true; isLogin = true"
                                             class="flex-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-semibold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-2 group">
-                                            <svg class="w-5 h-5 group-hover:animate-pulse" fill="none"
-                                                stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-5 h-5 group-hover:animate-pulse" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                             </svg>
                                             <span>Beli Sekarang</span>
-                                        </a>
+                                        </button>
                                     @endguest
 
                                 </div>

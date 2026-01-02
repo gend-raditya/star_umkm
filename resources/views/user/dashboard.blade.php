@@ -9,6 +9,27 @@
 
         {{-- Main Content --}}
         <main class="flex-1 p-8">
+            @if (session('success'))
+        <div x-data="{ show: true }"
+             x-show="show"
+             x-init="setTimeout(() => show = false, 3000)"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-2"
+             class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl shadow-sm flex items-center gap-2">
+
+            <div class="bg-emerald-100 p-1 rounded-full">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+
+            <span class="font-medium text-sm">{{ session('success') }}</span>
+        </div>
+    @endif
             <h1 class="text-2xl font-bold mb-6">Selamat Datang, {{ $user->name }} 👋</h1>
 
             {{-- Notifikasi Pesanan Aktif --}}
