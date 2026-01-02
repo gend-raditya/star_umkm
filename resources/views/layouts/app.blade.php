@@ -202,7 +202,7 @@
                 @yield('content')
             </main>
 
-          
+
             {{-- Flash Message --}}
             @if (session('success'))
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" x-transition
@@ -431,7 +431,7 @@
                     <!-- Nomor HP -->
                     <label class="block mb-3">
                         <span class="text-gray-700">Nomor HP Seller</span>
-                        <input type="text" name="nomor_hp" class="w-full mt-1 p-2 border rounded" required>
+                        <input type="text" name="no_waSeller" class="w-full mt-1 p-2 border rounded" required>
                     </label>
 
                     <!-- Jenis Rekening -->

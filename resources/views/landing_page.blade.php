@@ -72,10 +72,10 @@
                 <div class="w-24 h-1 bg-gradient-to-r from-purple-400 to-pink-400 mx-auto mt-4 rounded-full"></div>
             </div> --}}
             <div
-                class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10 animate-fade-in mt-6">
+                class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10 animate-fade-in mt-0">
                 <div>
                     <h2 class="text-3xl sm:text-4xl font-bold text-sage-900 mb-2">Koleksi Kami</h2>
-                    <p class="text-sage-600">Produk pilihan khusus untuk Anda</p>
+                    <p class="text-stone-600">Produk pilihan khusus untuk Anda</p>
                     {{-- <div class="mt-4 w-24 h-1 bg-gradient-to-r from-emerald-400 to-teal-400 mx-auto rounded-full"></div> --}}
                 </div>
             </div>
@@ -117,7 +117,13 @@
                                 class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                 <a href="{{ route('produk.show', $produk->id) }}"
                                     class="px-6 py-3 bg-white text-gray-900 rounded-full font-semibold hover:bg-gray-100 transition-colors duration-200 transform scale-95 group-hover:scale-100">
-                                    Lihat Detail
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    {{-- Lihat Detail --}}
                                 </a>
                             </div>
                         </div>
@@ -311,10 +317,10 @@
 
 
     {{-- <div class="bg-white/40 backdrop-blur-md py-20"> --}}
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-28">
-            <div class="text-start mb-10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-24">
+            <div class="text-center mb-10">
                 <h2 class="text-4xl font-bold text-stone-800">Kenapa Memilih Kami?</h2>
-                <p class="mt-2 mb-5 text-stone-500">Komitmen kami untuk menjaga kualitas dan kepercayaan.</p>
+                <p class="mt-2 mb-5 text-stone-600">Komitmen kami untuk menjaga kualitas dan kepercayaan.</p>
                 {{-- <div class="mt-4 w-24 h-1 bg-gradient-to-r from-emerald-400 to-teal-400 mx-auto rounded-full"></div> --}}
             </div>
 
@@ -399,24 +405,23 @@
     <section id="lokasi" class="mb-8 sm:mb-4 p-12">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 mb-20">
             <div class="max-w-3xl mx-auto text-center mb-10 mt-0">
-                <h2 class="text-3xl sm:text-4xl font-bold text-sage-900 mb-3">
+                <h2 class="text-3xl sm:text-4xl font-bold text-stone-900 mb-3">
                     Kunjungi Toko Kami
                 </h2>
-                <p class="text-lg text-sage-600">
+                <p class="text-lg text-stone-600">
                     Kami siap menyambut Anda dan membantu menemukan produk yang tepat.
                 </p>
             </div>
 
-            <div class="bg-white rounded-2xl border-2 border-sage-200 shadow-xl overflow-hidden animate-fade-in-up">
+            <div class="bg-white rounded-2xl border-2 border-[#AED3BE] shadow-xl overflow-hidden animate-fade-in-up">
                 <div class="grid grid-cols-1 lg:grid-cols-3">
                     {{-- Store Info --}}
-                    <div class="lg:col-span-1 p-8 bg-sage-50 flex flex-col justify-center">
-                        <h3 class="text-2xl font-bold text-sage-900 mb-6">Star UMKM</h3>
-
+                    <div class="lg:col-span-1 p-8 bg-[#f3f7f2] flex flex-col justify-center">
+                        <h3 class="text-2xl font-bold text-stone-900 mb-6">Star UMKM</h3>
                         <div class="space-y-5">
                             {{-- Address --}}
                             <div class="flex items-start gap-4">
-                                <svg class="w-6 h-6 text-sage-600 mt-1 flex-shrink-0" fill="none"
+                                <svg class="w-6 h-6 text-stone-600 mt-1 flex-shrink-0" fill="none"
                                     stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
@@ -425,7 +430,7 @@
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
                                 <div>
-                                    <h4 class="font-semibold text-sage-800">Alamat</h4>
+                                    <h4 class="font-semibold text-stone-800">Alamat</h4>
                                     <p class="text-sage-700">
                                         Jl. Adinegoro No.mor 11 A, Padang Sarai, Kec. Koto Tangah, Kota Padang, Sumatera Barat 25713
                                     </p>
@@ -450,7 +455,7 @@
                         {{-- Direction Button --}}
                         <div class="mt-8">
                             <a href="https://maps.app.goo.gl/xAMMW17EsfodrzYFA" target="_blank"
-                                class="inline-flex items-center justify-center gap-2 w-full px-6 py-3 bg-sage-600 text-black font-bold rounded-lg hover:bg-sage-700 transition-all duration-300 shadow-md transform hover:scale-105">
+                                class="inline-flex items-center justify-center gap-2 w-full px-6 py-3.5 bg-[#3a5a4a] text-white font-semibold rounded-lg hover:bg-[#2c4438] transition-all duration-300 shadow-lg transform hover:-translate-y-0.5">
                                 Dapatkan Arah
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -462,7 +467,7 @@
 
                     {{-- Map --}}
                     <div class="lg:col-span-2 h-80 lg:h-full">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.4191284694334!2d100.3135965741177!3d-0.8105046991816224!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2fd4c3da09f3760b%3A0xe5fd259816f74ab3!2sChristine%20Hakim%20Idea%20Park!5e0!3m2!1sid!2sid!4v1767300832837!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.4191284694334!2d100.3135965741177!3d-0.8105046991816224!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2fd4c3da09f3760b%3A0xe5fd259816f74ab3!2sChristine%20Hakim%20Idea%20Park!5e0!3m2!1sid!2sid!4v1767300832837!5m2!1sid!2sid" width="750" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
             </div>

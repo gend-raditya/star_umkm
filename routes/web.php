@@ -57,7 +57,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     //seller
-    Route::post('/seller/register', [SellerController::class, 'register'])->name('seller.register');
+    // Route::post('/seller/register', [SellerController::class, 'register'])->name('seller.register');
 
     Route::patch('/seller/produk/{id}/stok', [SellerProdukController::class, 'updateStok'])
         ->name('seller.produk.updateStok');
@@ -90,8 +90,12 @@ Route::middleware(['auth'])->group(function () {
 });
 //isi data seller
 Route::middleware(['auth'])->group(function () {
+
+    // 2. Route untuk menampilkan form
     Route::get('/seller/register', [SellerController::class, 'create'])->name('seller.create');
-    Route::post('/seller/register', [SellerController::class, 'store'])->name('seller.store');
+
+    // 3. Route untuk memproses form (Simpan Data)
+    // Pastikan ini satu-satunya POST ke /seller/register
     Route::post('/seller/register', [SellerController::class, 'store'])->name('seller.store');
 });
 
