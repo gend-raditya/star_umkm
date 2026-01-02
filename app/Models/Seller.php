@@ -17,7 +17,7 @@ protected $fillable = [
 'nama_seller',
 'foto_toko',
 'nomor_hp',
-'no_waSeller',
+// 'no_waSeller',
 'jenis_rekening',
 'nomor_rekening',
 ];

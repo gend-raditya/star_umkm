@@ -402,7 +402,11 @@
 
                     <label class="block mb-3">
                         <span class="text-gray-700">Nomor HP Seller</span>
-                        <input type="text" name="no_waSeller" class="w-full mt-1 p-2 border rounded" required>
+                        <input type="text" name="nomor_hp" class="w-full mt-1 p-2 border rounded" required>
+
+                        @error('nomor_hp')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
                     </label>
 
                     <!-- Jenis Rekening -->

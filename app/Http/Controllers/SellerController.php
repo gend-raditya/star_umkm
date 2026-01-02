@@ -10,20 +10,20 @@ use App\Models\User;
 class SellerController extends Controller
 {
     // Halaman pengajuan seller
-    public function register(Request $request)
-    {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
+    // public function register(Request $request)
+    // {
+    //     /** @var \App\Models\User $user */
+    //     $user = Auth::user();
 
-        if ($user->is_seller && $user->seller_status === 'approved') {
-            return redirect()->route('seller.dashboard')->with('info', 'Kamu sudah jadi seller.');
-        }
+    //     if ($user->is_seller && $user->seller_status === 'approved') {
+    //         return redirect()->route('seller.dashboard')->with('info', 'Kamu sudah jadi seller.');
+    //     }
 
-        $user->seller_status = 'pending';
-        $user->save();
+    //     $user->seller_status = 'pending';
+    //     $user->save();
 
-        return back()->with('success', 'Pengajuan jadi seller telah dikirim. Tunggu persetujuan admin.');
-    }
+    //     return back()->with('success', 'Pengajuan jadi seller telah dikirim. Tunggu persetujuan admin.');
+    // }
 
     // Dashboard seller (hanya bisa diakses kalau disetujui)
     public function index()
@@ -63,44 +63,63 @@ class SellerController extends Controller
 
         return back()->with('info', 'Anda sudah mengajukan sebelumnya.');
     }
+    // Menampilkan form (jika diakses lewat URL /seller/register)
     public function create()
     {
+        // Jika form Anda berbentuk Modal di Dashboard User,
+        // function ini mungkin jarang dipakai, tapi biarkan saja.
         return view('seller.register');
     }
 
-
+    // PROSES SIMPAN DATA (Ini yang dipanggil Modal)
     public function store(Request $request)
     {
+        // 1. Validasi Input
         $validated = $request->validate([
             'nama_seller' => 'required|string|max:255',
             'foto_toko' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
-            'nomor_hp' => 'required|string|max:20',
+            'nomor_hp' => 'required|string|max:20', // Pastikan HTML name="nomor_hp"
             'jenis_rekening' => 'required|string|max:50',
             'nomor_rekening' => 'required|string|max:50',
         ]);
 
+        // 2. Upload Foto (Jika ada)
         $path = null;
         if ($request->hasFile('foto_toko')) {
             $path = $request->file('foto_toko')->store('foto_toko', 'public');
         }
 
-        // Simpan ke tabel sellers
-        Seller::create([
-            'user_id' => Auth::id(),
-            'nama_seller' => $validated['nama_seller'],
-            'foto_toko' => $path,
-            'nomor_hp' => $validated['nomor_hp'],
-            'jenis_rekening' => $validated['jenis_rekening'],
-            'nomor_rekening' => $validated['nomor_rekening'],
-        ]);
+        // 3. Simpan ke Tabel Sellers
+        // Seller::create([
+        //     'user_id' => Auth::id(),
+        //     'nama_seller' => $validated['nama_seller'],
+        //     'foto_toko' => $path,
+        //     'nomor_hp' => $validated['nomor_hp'],
+        //     'jenis_rekening' => $validated['jenis_rekening'],
+        //     'nomor_rekening' => $validated['nomor_rekening'],
+        // ]);
 
-        // UPDATE STATUS USER (WAJIB)
+
+        Seller::updateOrCreate(
+            ['user_id' => Auth::id()], // Kunci pencarian
+            [
+                'nama_seller' => $validated['nama_seller'],
+                'foto_toko' => $path, // Hati-hati: kalau user tidak upload foto baru, logika ini perlu disesuaikan agar foto lama tidak hilang (opsional)
+                'nomor_hp' => $validated['nomor_hp'],
+                'jenis_rekening' => $validated['jenis_rekening'],
+                'nomor_rekening' => $validated['nomor_rekening'],
+            ]
+        );
+
+        // 4. Update Status User
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $user->seller_status = 'pending';
         $user->is_seller = false;
         $user->save();
 
+        // 5. Redirect dengan Sukses
         return redirect()->route('user.dashboard')
-            ->with('success', 'Data seller berhasil dikirim! Tunggu persetujuan admin.');
+            ->with('success', 'Pengajuan seller berhasil dikirim! Mohon tunggu persetujuan Admin.');
     }
 }
