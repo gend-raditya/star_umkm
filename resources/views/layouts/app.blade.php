@@ -131,7 +131,7 @@
                                         <a href="{{ route('pesanan.saya') }}"
                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pesanan Saya</a>
 
-                                        @if (!Auth::user()->is_seller)
+                                        @if (Auth::user()->seller_status === null)
                                             <button @click="openSellerModal = true"
                                                 class="w-full text-left px-4 py-2 text-sm text-blue-700 hover:bg-blue-100 font-semibold">
                                                 💼 Ajukan Jadi Seller
@@ -201,6 +201,30 @@
             <main class="flex-1 mt-20">
                 @yield('content')
             </main>
+
+          
+            {{-- Flash Message --}}
+            @if (session('success'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" x-transition
+                    class="fixed top-24 right-5 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition
+                    class="fixed top-24 right-5 z-50 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if (session('info'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition
+                    class="fixed top-24 right-5 z-50 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg">
+                    {{ session('info') }}
+                </div>
+            @endif
+
 
 
             <!-- Modern Footer -->
@@ -382,27 +406,32 @@
         </script>
 
         <!-- Modal Seller -->
+        <!-- Modal Seller -->
         <div x-show="openSellerModal" x-cloak
             class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div @click.outside="openSellerModal = false" class="bg-white w-full max-w-lg p-6 rounded shadow-lg">
+
                 <h2 class="text-xl font-bold mb-4">Form Pendaftaran Seller</h2>
 
                 <form action="{{ route('seller.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
+                    <!-- Nama Seller -->
                     <label class="block mb-3">
                         <span class="text-gray-700">Nama Seller</span>
                         <input type="text" name="nama_seller" class="w-full mt-1 p-2 border rounded" required>
                     </label>
 
+                    <!-- Foto Toko -->
                     <label class="block mb-3">
                         <span class="text-gray-700">Foto Toko / Banner (Opsional)</span>
                         <input type="file" name="foto_toko" class="w-full mt-1 p-2 border rounded">
                     </label>
 
+                    <!-- Nomor HP -->
                     <label class="block mb-3">
                         <span class="text-gray-700">Nomor HP Seller</span>
-                        <input type="text" name="no_waSeller" class="w-full mt-1 p-2 border rounded" required>
+                        <input type="text" name="nomor_hp" class="w-full mt-1 p-2 border rounded" required>
                     </label>
 
                     <!-- Jenis Rekening -->
@@ -419,6 +448,7 @@
                         </select>
                     </label>
 
+                    <!-- Nomor Rekening -->
                     <label class="block mb-3">
                         <span class="text-gray-700">Nomor Rekening</span>
                         <input type="text" name="nomor_rekening" class="w-full mt-1 p-2 border rounded" required>
@@ -436,6 +466,7 @@
                 </form>
             </div>
         </div>
+
 
 </body>
 
