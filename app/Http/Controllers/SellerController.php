@@ -10,20 +10,23 @@ use App\Models\User;
 class SellerController extends Controller
 {
     // Halaman pengajuan seller
-    public function register(Request $request)
-    {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
+    public function register()
+{
+    $user = Auth::user();
 
-        if ($user->is_seller && $user->seller_status === 'approved') {
-            return redirect()->route('seller.dashboard')->with('info', 'Kamu sudah jadi seller.');
-        }
-
-        $user->seller_status = 'pending';
-        $user->save();
-
-        return back()->with('success', 'Pengajuan jadi seller telah dikirim. Tunggu persetujuan admin.');
+    if ($user->seller_status === 'approved') {
+        return redirect()->route('seller.dashboard')
+            ->with('info', 'Kamu sudah menjadi seller.');
     }
+
+    if ($user->seller_status === 'pending') {
+        return back()->with('info', 'Pengajuan kamu sedang diproses.');
+    }
+
+    // status NULL → tidak ngapa-ngapain
+    return back();
+}
+
 
     // Dashboard seller (hanya bisa diakses kalau disetujui)
     public function index()
@@ -71,6 +74,11 @@ class SellerController extends Controller
 
     public function store(Request $request)
     {
+        // ❌ Cegah daftar ulang
+        if (Seller::where('user_id', Auth::id())->exists()) {
+            return back()->with('info', 'Kamu sudah mengajukan pendaftaran seller.');
+        }
+
         $validated = $request->validate([
             'nama_seller' => 'required|string|max:255',
             'foto_toko' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
@@ -95,6 +103,7 @@ class SellerController extends Controller
         ]);
 
         // UPDATE STATUS USER (WAJIB)
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $user->seller_status = 'pending';
         $user->is_seller = false;
