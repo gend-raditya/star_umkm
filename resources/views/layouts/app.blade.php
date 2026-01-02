@@ -167,13 +167,24 @@
                                         @endif
 
 
-                                        <form method="POST" action="{{ route('logout') }}">
+                                        <div class="py-1 border-t border-sage-50">
+                                        <form method="POST" action="{{ route('logout') }}"
+                                        onsubmit="return confirm('Apakah Anda yakin ingin keluar?');">
                                             @csrf
                                             <button type="submit"
-                                                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                Logout
+                                            class="w-full group flex items-center gap-3 px-5 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors text-left">
+                                                <div class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                                                    🔚
+                                                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                                </div>
+                                                <span class="font-medium">Logout</span>
                                             </button>
                                         </form>
+                                    </div>
+
+
+
+
                                     </div>
                                 </div>
                             @endauth
