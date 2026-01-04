@@ -181,11 +181,24 @@
         fetch(form.action, {
                 method: "POST",
                 headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    "Accept": "application/json" // <--- 1. TAMBAHAN PENTING (Agar error jadi JSON)
                 },
                 body: formData
             })
-            .then(res => res.json())
+            // 2. Cek apakah status sukses atau error
+            .then(async res => {
+                if (!res.ok) {
+                    const text = await res.text();
+                    try {
+                        const json = JSON.parse(text);
+                        throw new Error(json.error || json.message || res.statusText);
+                    } catch (e) {
+                        throw new Error(text); // Kalau masih HTML, lempar sebagai text
+                    }
+                }
+                return res.json();
+            })
             .then(data => {
                 console.log("Response dari server:", data);
 
@@ -210,12 +223,12 @@
                     });
                 } else {
                     alert("Gagal mendapatkan token Midtrans!");
-                    console.error(data);
                 }
             })
             .catch(err => {
                 console.error("Fetch error:", err);
-                alert("Gagal menghubungi server!");
+                // 3. Tampilkan pesan error yang lebih rapi
+                alert("Gagal: " + err.message);
             });
     });
 </script>

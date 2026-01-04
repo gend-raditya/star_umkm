@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use Midtrans\Config;
+use Midtrans\Snap;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Produk;
 use App\Models\Keranjang;
 use App\Models\Pesanan;
 use App\Models\PesananItem;
-use App\Services\MidtransService;
+// Hapus atau abaikan use App\Services\MidtransService;
 use App\Notifications\PesananPaidNotification;
+use App\Services\MidtransService;
 use Illuminate\Support\Facades\Log;
 
 
@@ -71,100 +74,201 @@ class PesananController extends Controller
     /**
      * ✅ Proses checkout (buat pesanan dan kirim ke Midtrans)
      */
-    public function prosesCheckout(Request $request, MidtransService $midtrans)
+    // public function prosesCheckout(Request $request, MidtransService $midtrans)
+    // {
+    //     $user = Auth::user();
+    //     $invoice = 'INV-' . strtoupper(uniqid());
+
+    //     // 🟢 CASE 1: Checkout langsung 1 produk
+    //     if ($request->has('produk_id') && !is_array($request->produk_id)) {
+    //         $produk = Produk::findOrFail($request->produk_id);
+    //         $jumlah = (int)$request->jumlah;
+    //         $total = $produk->harga * $jumlah;
+    //     }
+
+    //     // 🟢 CASE 2: Checkout beberapa produk dari keranjang (checkbox)
+    //     elseif (is_array($request->produk_id)) {
+    //         $produkIds = $request->input('produk_id', []);
+    //         $jumlahs = $request->input('jumlah', []);
+
+    //         $total = 0;
+    //         $produkList = [];
+
+    //         foreach ($produkIds as $id) {
+    //             $produk = Produk::findOrFail($id);
+    //             $jumlah = $jumlahs[$id] ?? 1;
+    //             $subtotal = $produk->harga * $jumlah;
+    //             $total += $subtotal;
+
+    //             $produkList[] = [
+    //                 'produk' => $produk,
+    //                 'jumlah' => $jumlah,
+    //                 'subtotal' => $subtotal,
+    //             ];
+    //         }
+    //     }
+
+    //     // 🟢 CASE 3: Checkout semua isi keranjang
+    //     else {
+    //         $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
+    //         if ($keranjang->isEmpty()) {
+    //             return response()->json(['error' => 'Keranjang kosong!'], 400);
+    //         }
+
+    //         $total = $keranjang->sum(fn($item) => $item->produk->harga * $item->jumlah);
+    //         $produkList = $keranjang->map(function ($item) {
+    //             return [
+    //                 'produk' => $item->produk,
+    //                 'jumlah' => $item->jumlah,
+    //                 'subtotal' => $item->produk->harga * $item->jumlah,
+    //             ];
+    //         })->toArray();
+    //     }
+
+    //     // 🧮 Validasi total
+    //     if ((int)$request->total !== (int)$total) {
+    //         return response()->json(['error' => 'Total tidak sesuai!'], 400);
+    //     }
+
+    //     // 🧾 Buat pesanan
+    //     $pesanan = Pesanan::create([
+    //         'user_id' => $user->id,
+    //         'invoice' => $invoice,
+    //         'nama' => $request->nama_pemesan ?? $user->name,
+    //         'no_hp' => $request->telepon,
+    //         'alamat' => $request->alamat,
+    //         'total' => $total,
+    //         'status' => 'Diproses',
+    //     ]);
+
+    //     // 💾 Simpan item pesanan
+    //     foreach ($produkList ?? [compact('produk', 'jumlah', 'subtotal')] as $item) {
+    //         PesananItem::create([
+    //             'pesanan_id' => $pesanan->id,
+    //             'produk_id'  => $item['produk']->id,
+    //             'jumlah'     => $item['jumlah'],
+    //             'subtotal'   => $item['subtotal'],
+    //         ]);
+    //     }
+
+    //     // 🧹 Hapus dari keranjang setelah checkout
+    //     Keranjang::where('user_id', $user->id)
+    //         ->whereIn('produk_id', $request->produk_id ?? [])
+    //         ->delete();
+
+    //     // 💳 Buat transaksi Midtrans
+    //     $snapToken = $midtrans->createTransaction(
+    //         $invoice,
+    //         $total,
+    //         [
+    //             'first_name' => $request->nama_pemesan ?? $user->name ?? 'Guest',
+    //             'email'      => $user->email ?? 'guest@example.com',
+    //         ]
+    //     );
+
+    //     return response()->json(['snap_token' => $snapToken]);
+    // }
+
+
+    public function prosesCheckout(Request $request) // Hapus parameter MidtransService $midtrans
     {
-        $user = Auth::user();
-        $invoice = 'INV-' . strtoupper(uniqid());
+        try { // 🟢 Tambahkan Try-Catch agar error tidak jadi HTML
+            $user = Auth::user();
+            $invoice = 'INV-' . strtoupper(uniqid());
 
-        // 🟢 CASE 1: Checkout langsung 1 produk
-        if ($request->has('produk_id') && !is_array($request->produk_id)) {
-            $produk = Produk::findOrFail($request->produk_id);
-            $jumlah = (int)$request->jumlah;
-            $total = $produk->harga * $jumlah;
-        }
-
-        // 🟢 CASE 2: Checkout beberapa produk dari keranjang (checkbox)
-        elseif (is_array($request->produk_id)) {
-            $produkIds = $request->input('produk_id', []);
-            $jumlahs = $request->input('jumlah', []);
-
-            $total = 0;
-            $produkList = [];
-
-            foreach ($produkIds as $id) {
-                $produk = Produk::findOrFail($id);
-                $jumlah = $jumlahs[$id] ?? 1;
-                $subtotal = $produk->harga * $jumlah;
-                $total += $subtotal;
-
-                $produkList[] = [
-                    'produk' => $produk,
-                    'jumlah' => $jumlah,
-                    'subtotal' => $subtotal,
-                ];
-            }
-        }
-
-        // 🟢 CASE 3: Checkout semua isi keranjang
-        else {
-            $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
-            if ($keranjang->isEmpty()) {
-                return response()->json(['error' => 'Keranjang kosong!'], 400);
+            // --- BAGIAN LOGIKA PRODUK/KERANJANG (SAMA SEPERTI ASLIMU) ---
+            if ($request->has('produk_id') && !is_array($request->produk_id)) {
+                $produk = Produk::findOrFail($request->produk_id);
+                $jumlah = (int)$request->jumlah;
+                $total = $produk->harga * $jumlah;
+            } elseif (is_array($request->produk_id)) {
+                $produkIds = $request->input('produk_id', []);
+                $jumlahs = $request->input('jumlah', []);
+                $total = 0;
+                $produkList = [];
+                foreach ($produkIds as $id) {
+                    $produk = Produk::findOrFail($id);
+                    $jumlah = $jumlahs[$id] ?? 1;
+                    $subtotal = $produk->harga * $jumlah;
+                    $total += $subtotal;
+                    $produkList[] = ['produk' => $produk, 'jumlah' => $jumlah, 'subtotal' => $subtotal];
+                }
+            } else {
+                $keranjang = Keranjang::with('produk')->where('user_id', $user->id)->get();
+                if ($keranjang->isEmpty()) {
+                    return response()->json(['error' => 'Keranjang kosong!'], 400);
+                }
+                $total = $keranjang->sum(fn($item) => $item->produk->harga * $item->jumlah);
+                $produkList = $keranjang->map(function ($item) {
+                    return ['produk' => $item->produk, 'jumlah' => $item->jumlah, 'subtotal' => $item->produk->harga * $item->jumlah];
+                })->toArray();
             }
 
-            $total = $keranjang->sum(fn($item) => $item->produk->harga * $item->jumlah);
-            $produkList = $keranjang->map(function ($item) {
-                return [
-                    'produk' => $item->produk,
-                    'jumlah' => $item->jumlah,
-                    'subtotal' => $item->produk->harga * $item->jumlah,
-                ];
-            })->toArray();
-        }
+            if ((int)$request->total !== (int)$total) {
+                return response()->json(['error' => 'Total tidak sesuai!'], 400);
+            }
 
-        // 🧮 Validasi total
-        if ((int)$request->total !== (int)$total) {
-            return response()->json(['error' => 'Total tidak sesuai!'], 400);
-        }
-
-        // 🧾 Buat pesanan
-        $pesanan = Pesanan::create([
-            'user_id' => $user->id,
-            'invoice' => $invoice,
-            'nama' => $request->nama_pemesan ?? $user->name,
-            'no_hp' => $request->telepon,
-            'alamat' => $request->alamat,
-            'total' => $total,
-            'status' => 'Diproses',
-        ]);
-
-        // 💾 Simpan item pesanan
-        foreach ($produkList ?? [compact('produk', 'jumlah', 'subtotal')] as $item) {
-            PesananItem::create([
-                'pesanan_id' => $pesanan->id,
-                'produk_id'  => $item['produk']->id,
-                'jumlah'     => $item['jumlah'],
-                'subtotal'   => $item['subtotal'],
+            // --- BUAT PESANAN (SAMA SEPERTI ASLIMU) ---
+            $pesanan = Pesanan::create([
+                'user_id' => $user->id,
+                'invoice' => $invoice,
+                'nama' => $request->nama_pemesan ?? $user->name,
+                'no_hp' => $request->telepon,
+                'alamat' => $request->alamat,
+                'total' => $total,
+                'status' => 'Diproses',
             ]);
+
+            foreach ($produkList ?? [compact('produk', 'jumlah', 'subtotal')] as $item) {
+                PesananItem::create([
+                    'pesanan_id' => $pesanan->id,
+                    'produk_id'  => $item['produk']->id,
+                    'jumlah'     => $item['jumlah'],
+                    'subtotal'   => $item['subtotal'],
+                ]);
+            }
+
+            // Hapus Keranjang
+            Keranjang::where('user_id', $user->id)
+                ->whereIn('produk_id', $request->produk_id ?? [])
+                ->delete();
+
+            // 🟢 2. CONFIG MIDTRANS MANUAL (Solusi Error 401)
+            // Kita panggil langsung dari config/midtrans.php tanpa lewat Service
+            Config::$serverKey = config('midtrans.server_key');
+            Config::$isProduction = config('midtrans.is_production');
+            Config::$isSanitized = config('midtrans.is_sanitized');
+            Config::$is3ds = config('midtrans.is_3ds');
+
+            // Cek Server Key (Debugging)
+            if (empty(Config::$serverKey)) {
+                return response()->json(['error' => 'Server Key Midtrans Kosong! Cek .env'], 500);
+            }
+
+            // Buat Params
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $invoice,
+                    'gross_amount' => (int) $total,
+                ],
+                'customer_details' => [
+                    'first_name' => $request->nama_pemesan ?? $user->name,
+                    'email' => $user->email,
+                    'phone' => $request->telepon,
+                ]
+            ];
+
+            // Minta Snap Token
+            $snapToken = Snap::getSnapToken($params);
+
+            return response()->json(['snap_token' => $snapToken]);
+
+        } catch (\Exception $e) {
+            // 🟢 Tangkap error dan kirim JSON (Bukan HTML)
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        // 🧹 Hapus dari keranjang setelah checkout
-        Keranjang::where('user_id', $user->id)
-            ->whereIn('produk_id', $request->produk_id ?? [])
-            ->delete();
-
-        // 💳 Buat transaksi Midtrans
-        $snapToken = $midtrans->createTransaction(
-            $invoice,
-            $total,
-            [
-                'first_name' => $request->nama_pemesan ?? $user->name ?? 'Guest',
-                'email'      => $user->email ?? 'guest@example.com',
-            ]
-        );
-
-        return response()->json(['snap_token' => $snapToken]);
     }
+
 
     /**
      * ✅ Halaman pesanan sukses

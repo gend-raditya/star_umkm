@@ -20,6 +20,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
+        [x-cloak] { display: none !important; }
         body {
             font-family: 'Inter', system-ui, sans-serif;
         }
@@ -143,7 +144,9 @@
                                         </svg>
                                     </button>
 
-                                    <div x-show="open" @click.outside="open = false"
+                                    <div x-show="open"
+                                        @click.outside="open = false"
+                                        x-cloak {{-- <--- TAMBAHKAN INI --}}
                                         class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
                                         <a href="{{ route('user.dashboard') }}"
                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Saya</a>
@@ -464,7 +467,7 @@
                     <!-- Nomor HP -->
                     <label class="block mb-3">
                         <span class="text-gray-700">Nomor HP Seller</span>
-                        <input type="text" name="no_waSeller" class="w-full mt-1 p-2 border rounded" required>
+                        <input type="text" name="nomor_hp" class="w-full mt-1 p-2 border rounded" required>
                     </label>
 
                     <!-- Jenis Rekening -->

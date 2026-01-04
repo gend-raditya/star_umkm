@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Produk;
@@ -77,6 +78,7 @@ class SellerProdukController extends Controller
     // Update produk
     public function update(Request $request, $id)
     {
+        // Cari produk dan pastikan milik user yang sedang login
         $produk = Produk::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
         $request->validate([
@@ -87,15 +89,32 @@ class SellerProdukController extends Controller
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $data = $request->only('nama', 'harga', 'deskripsi', 'kategori_id');
+        // 1. Update data text (nama, harga, deskripsi, kategori) ke tabel produk
+        $produk->update([
+            'nama' => $request->nama,
+            'harga' => $request->harga,
+            'deskripsi' => $request->deskripsi,
+            'kategori_id' => $request->kategori_id,
+        ]);
 
-        // Upload foto baru kalau ada
+        // 2. Logic Foto: Karena menggunakan tabel terpisah (relasi)
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('produk', 'public');
-            $data['foto'] = $path;
-        }
 
-        $produk->update($data);
+            // Ambil data foto lama dari tabel relasi 'fotos'
+            $fotoLama = $produk->fotos()->first();
+
+            // Jika ada foto lama, hapus filenya dari storage & database
+            if ($fotoLama) {
+                Storage::disk('public')->delete($fotoLama->path); // Hapus file fisik
+                $fotoLama->delete(); // Hapus record di db
+            }
+
+            // Upload foto baru
+            $path = $request->file('foto')->store('produk', 'public');
+
+            // Simpan path baru ke tabel relasi 'fotos'
+            $produk->fotos()->create(['path' => $path]);
+        }
 
         return redirect()->route('seller.dashboard')->with('success', 'Produk berhasil diperbarui.');
     }

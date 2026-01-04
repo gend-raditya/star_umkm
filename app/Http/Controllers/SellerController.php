@@ -92,37 +92,29 @@ class SellerController extends Controller
             $path = $request->file('foto_toko')->store('foto_toko', 'public');
         }
 
-        // 3. Simpan ke Tabel Sellers
-        // Seller::create([
-        //     'user_id' => Auth::id(),
-        //     'nama_seller' => $validated['nama_seller'],
-        //     'foto_toko' => $path,
-        //     'nomor_hp' => $validated['nomor_hp'],
-        //     'jenis_rekening' => $validated['jenis_rekening'],
-        //     'nomor_rekening' => $validated['nomor_rekening'],
-        // ]);
-
-
+        // 3. Simpan atau Update ke Tabel Sellers
+        // Menggunakan updateOrCreate agar jika user sudah pernah daftar, datanya di-update
         Seller::updateOrCreate(
-            ['user_id' => Auth::id()], // Kunci pencarian
+            ['user_id' => Auth::id()], // Cek berdasarkan user_id yang login
             [
                 'nama_seller' => $validated['nama_seller'],
-                'foto_toko' => $path, // Hati-hati: kalau user tidak upload foto baru, logika ini perlu disesuaikan agar foto lama tidak hilang (opsional)
+                // Jika user tidak upload foto baru, pakai foto lama (logika sederhana)
+                'foto_toko' => $path ?? Seller::where('user_id', Auth::id())->value('foto_toko'),
                 'nomor_hp' => $validated['nomor_hp'],
                 'jenis_rekening' => $validated['jenis_rekening'],
                 'nomor_rekening' => $validated['nomor_rekening'],
             ]
         );
 
-        // 4. Update Status User
+        // 4. Update Status User menjadi PENDING
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $user->seller_status = 'pending';
-        $user->is_seller = false;
+        $user->seller_status = 'pending'; // Status berubah jadi pending agar muncul di Admin
+        $user->is_seller = false; // Belum jadi seller sampai di-approve admin
         $user->save();
 
-        // 5. Redirect dengan Sukses
+        // 5. Redirect dengan Pesan Sukses
         return redirect()->route('user.dashboard')
-            ->with('success', 'Pengajuan seller berhasil dikirim! Mohon tunggu persetujuan Admin.');
+            ->with('success', 'Pengajuan berhasil dikirim! Mohon tunggu persetujuan Admin.');
     }
 }

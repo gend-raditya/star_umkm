@@ -11,12 +11,20 @@ class AdminSellerController extends Controller
 {
     public function index()
     {
-        // Ambil semua seller yang baru daftar (pending)
-        $sellers = Seller::with('user')
-            ->whereHas('user', function ($q) {
-                $q->where('seller_status', 'pending');
-            })
-            ->get();
+        // Ambil seller dimana user-nya memiliki status 'pending'
+        // $sellers = Seller::whereHas('user', function ($q) {
+        //     $q->where('seller_status', 'pending');
+        // })->with('user')->get();
+
+        // return view('admin.sellers.index', compact('sellers'));
+
+        // Ambil seller yang statusnya 'pending' ATAU 'rejected'
+        $sellers = Seller::whereHas('user', function ($q) {
+            $q->whereIn('seller_status', ['pending', 'rejected']);
+        })
+        ->with('user')
+        ->latest() // Agar data terbaru ada di atas
+        ->get();
 
         return view('admin.sellers.index', compact('sellers'));
     }
