@@ -432,7 +432,7 @@
                                 <div>
                                     <h4 class="font-semibold text-stone-800">Alamat</h4>
                                     <p class="text-sage-700">
-                                        Jl. Adinegoro No.mor 11 A, Padang Sarai, Kec. Koto Tangah, Kota Padang, Sumatera Barat 25713
+                                        Jl. Mega Permai I No.6 blok H, Padang Sarai, Koto Tangah, Padang City, West Sumatra 25586
                                     </p>
                                 </div>
                             </div>
@@ -454,7 +454,7 @@
 
                         {{-- Direction Button --}}
                         <div class="mt-8">
-                            <a href="https://maps.app.goo.gl/xAMMW17EsfodrzYFA" target="_blank"
+                            <a href="https://maps.app.goo.gl/uYfCRs9VSNi2qvd69" target="_blank"
                                 class="inline-flex items-center justify-center gap-2 w-full px-6 py-3.5 bg-[#3a5a4a] text-white font-semibold rounded-lg hover:bg-[#2c4438] transition-all duration-300 shadow-lg transform hover:-translate-y-0.5">
                                 Dapatkan Arah
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -467,7 +467,7 @@
 
                     {{-- Map --}}
                     <div class="lg:col-span-2 h-80 lg:h-full">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.4191284694334!2d100.3135965741177!3d-0.8105046991816224!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2fd4c3da09f3760b%3A0xe5fd259816f74ab3!2sChristine%20Hakim%20Idea%20Park!5e0!3m2!1sid!2sid!4v1767300832837!5m2!1sid!2sid" width="750" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15957.677061777153!2d100.3145516167492!3d-0.8103656305448704!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2fd4c3d09cf5bef3%3A0x93a0d216c4d46915!2sKOMPLEK.%20MEGA%20PERMAI%201!5e0!3m2!1sid!2sid!4v1767560503762!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
             </div>

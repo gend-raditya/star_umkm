@@ -82,7 +82,7 @@
 
                         <!-- Logo -->
                         <div class="flex items-center">
-                            <a href="{{ url('/') }}" class="flex items-center space-x-3">
+                            <a href="{{ url('/admin/login') }}" class="flex items-center space-x-3">
                                 <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                                     <span class="text-black text-lg font-bold">⭐</span>
                                 </div>

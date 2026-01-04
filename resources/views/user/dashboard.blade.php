@@ -95,21 +95,23 @@
                     </div>
                 </a>
 
-                <a href="{{ route('user.riwayat.pesanan') }}" class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 overflow-hidden">
-                    <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-emerald-50 rounded-full transition-transform group-hover:scale-110"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="p-3 bg-emerald-100 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">Sukses</span>
-                        </div>
-                        <h3 class="text-3xl font-bold text-gray-800">
-                            {{ \App\Models\Pesanan::where('user_id', $user->id)->where('status', 'selesai')->count() }}
-                        </h3>
-                        <p class="text-sm text-gray-500 mt-1 group-hover:text-emerald-600 transition-colors">Pesanan Selesai</p>
-                    </div>
-                </a>
+                {{-- Card 3: Pesanan Selesai Milik User --}}
+    <a href="{{ route('user.riwayat.pesanan') }}" class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 overflow-hidden">
+        <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-emerald-50 rounded-full transition-transform group-hover:scale-110"></div>
+        <div class="relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-emerald-100 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">Sukses</span>
+            </div>
+            {{-- FILTER USER ID DI SINI --}}
+            <h3 class="text-3xl font-bold text-gray-800">
+                {{ \App\Models\Pesanan::where('user_id', Auth::id())->where('status', 'Selesai')->count() }}
+            </h3>
+            <p class="text-sm text-gray-500 mt-1 group-hover:text-emerald-600 transition-colors">Pesanan Selesai</p>
+        </div>
+    </a>
             </div>
 
             <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 animate-fade-in-up delay-200 mb-6">
@@ -131,21 +133,20 @@
     </div>
 
     {{-- Data untuk Chart --}}
-    @php
-        // Mengambil data pesanan per bulan tahun ini
-        $monthlyOrders = \App\Models\Pesanan::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
-            ->where('user_id', $user->id)
-            ->whereYear('created_at', date('Y'))
-            ->groupBy('month')
-            ->pluck('count', 'month')
-            ->toArray();
+@php
+    // FILTER USER ID DI DALAM QUERY CHART
+    $monthlyOrders = \App\Models\Pesanan::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+        ->where('user_id', Auth::id())
+        ->whereYear('created_at', date('Y'))
+        ->groupBy('month')
+        ->pluck('count', 'month')
+        ->toArray();
 
-        // Mengisi array data 1-12 bulan (default 0 jika tidak ada data)
-        $chartData = [];
-        for ($i = 1; $i <= 12; $i++) {
-            $chartData[] = $monthlyOrders[$i] ?? 0;
-        }
-    @endphp
+    $chartData = [];
+    for ($i = 1; $i <= 12; $i++) {
+        $chartData[] = $monthlyOrders[$i] ?? 0;
+    }
+@endphp
 
     {{-- Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

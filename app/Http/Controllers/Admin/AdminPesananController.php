@@ -16,6 +16,9 @@ class AdminPesananController extends Controller
 
     public function show(Pesanan $pesanan)
     {
+        // return view('admin.pesanan.show', compact('pesanan'));
+
+        $pesanan->load('user', 'items.produk');
         return view('admin.pesanan.show', compact('pesanan'));
     }
 

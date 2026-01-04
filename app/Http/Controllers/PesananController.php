@@ -342,8 +342,16 @@ class PesananController extends Controller
 
     public function riwayat()
     {
-        $pesanan = Pesanan::where('status', 'selesai')->get();
-        return view('user.riwayat', compact('pesanan'));
+        // $pesanan = Pesanan::where('status', 'selesai')->get();
+        // return view('user.riwayat', compact('pesanan'));
+
+        // Gunakan auth()->id() tanpa tanda panah tambahan setelah kurung
+    $pesanan = \App\Models\Pesanan::where('user_id', Auth::id())
+                ->where('status', 'Selesai')
+                ->latest()
+                ->get();
+
+    return view('user.riwayat', compact('pesanan'));
     }
 
     //notif ke wa
