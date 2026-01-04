@@ -1,9 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-100 py-8 px-4">
-        <div class="max-w-5xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200/50">
+<section class="py-10 relative">
+
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white/80 rounded-2xl shadow-xl overflow-hidden border border-gray-200/50 mt-8 mb-12">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
 
                     <!-- Kolom Kiri: Galeri Foto -->
@@ -57,7 +58,7 @@
                             <div class="space-y-3">
                                 <div class="flex items-start justify-between">
                                     <h1
-                                        class="text-3xl font-bold text-gray-900 leading-tight bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                                        class="text-4xl font-bold text-gray-900 leading-tight bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
                                         {{ $produk->nama }}
                                     </h1>
 
@@ -92,7 +93,7 @@
                             </script>
 
                             <!-- Rating dengan animasi -->
-                            <div class="flex items-center space-x-2">
+                            {{-- <div class="flex items-center space-x-2">
                                 <div class="flex text-yellow-400 animate-pulse">
                                     @for ($i = 1; $i <= 5; $i++)
                                         <svg class="w-5 h-5 fill-current transition-all duration-200 hover:scale-125"
@@ -103,23 +104,23 @@
                                     @endfor
                                 </div>
                                 <span class="text-sm text-gray-600 font-medium">(4.8 / 150 ulasan)</span>
-                            </div>
+                            </div> --}}
 
                             <!-- Deskripsi dengan card style -->
                             <div
-                                class="bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl p-4 border border-gray-200/60 shadow-inner">
+                                class="bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl p-2.5 border border-gray-200/60 shadow-inner">
                                 <p class="text-gray-700 leading-relaxed">{{ $produk->deskripsi }}</p>
                             </div>
 
                             <!-- Harga dengan efek premium -->
                             <div
-                                class="bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 rounded-xl p-6 border-2 border-emerald-200/70 shadow-lg">
+                                class="bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 rounded-xl p-4 border-2 border-emerald-200/70 shadow-lg">
                                 <div class="flex items-end space-x-3">
                                     <p class="text-3xl font-bold text-emerald-600 drop-shadow-sm">
                                         Rp {{ number_format($produk->harga, 0, ',', '.') }}
                                     </p>
                                     <p class="text-lg text-gray-500 line-through mb-1 font-semibold">
-                                        Rp 199.000
+                                        Rp 59.000
                                     </p>
                                 </div>
                                 <div class="mt-3 flex items-center space-x-2">
@@ -129,7 +130,7 @@
                                             <path
                                                 d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
-                                        Hemat 57%
+                                        Hemat 37%
                                     </span>
                                     <span class="text-sm text-gray-600 font-semibold animate-pulse">
                                         Diskon Terbatas!
@@ -140,8 +141,8 @@
                             <!-- Fitur Produk dengan grid yang lebih rapi -->
                             <div class="grid grid-cols-2 gap-3">
                                 <div
-                                    class="flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200/50 shadow-md hover:shadow-lg transition-all duration-300">
-                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor"
+                                    class="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-1 border border-blue-200/50 shadow-md hover:shadow-lg transition-all duration-300">
+                                    <svg class="w-6 h-6 ml-6 text-blue-600" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M5 13l4 4L19 7"></path>
@@ -150,7 +151,7 @@
                                 </div>
                                 <div
                                     class="flex items-center space-x-2 bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-3 border border-purple-200/50 shadow-md hover:shadow-lg transition-all duration-300">
-                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor"
+                                    <svg class="w-6 h-6 ml-6 text-purple-600" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -178,7 +179,7 @@
                                             </button>
                                         </form>
                                         <a href="{{ route('checkout') }}?id={{ $produk->id }}&jumlah=1"
-                                            class="flex-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-semibold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-2 group">
+                                            class="flex-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-lg font-semibold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-2 group">
                                             <svg class="w-5 h-5 group-hover:animate-pulse" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -263,5 +264,6 @@
                 </div>
             </div>
         </div>
-    </div>
+
+    </section>
 @endsection

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-b from-teal-50/50 to-orange-50/50">
+<div class="min-h-screen">
 
     <div class="relative overflow-hidden">
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">

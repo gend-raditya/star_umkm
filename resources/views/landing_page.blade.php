@@ -141,7 +141,7 @@
                             </h3>
 
                             <p class="text-[#767480] text-sm mb-4 line-clamp-2">
-                                Produk berkualitas tinggi dengan desain eksklusif untuk gaya hidup modern Anda.
+                                {{ Str::limit($produk->deskripsi ?? 'Produk berkualitas tinggi dengan desain eksklusif.', 80) }}
                             </p>
 
                             <!-- Price and Action -->

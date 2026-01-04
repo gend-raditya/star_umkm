@@ -121,8 +121,11 @@ class ProdukController extends Controller
     public function search(Request $request)
     {
         $query = $request->input('q');
-        $produks = Produk::where('nama', 'like', '%' . $query . '%')->get();
+        $produks = Produk::where('nama', 'like', '%' . $query . '%')
+                        ->paginate(12)
+                        ->appends(['q' => $query]);
 
         return view('produk.index', compact('produks'));
+
     }
 }

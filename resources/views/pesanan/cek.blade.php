@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+<section class="py-10 relative">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
     <div class="container mx-auto max-w-7xl">
         <div class="mb-8">
             <h1 class="text-4xl font-bold text-gray-900 mb-2">🛒 Keranjang Belanja</h1>
@@ -158,6 +160,7 @@
         @endif
     </div>
 </div>
+    </section>
 
 <script>
 const cbAll = document.getElementById('select-all'),

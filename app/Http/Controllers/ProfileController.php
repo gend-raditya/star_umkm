@@ -60,7 +60,8 @@ class ProfileController extends Controller
         }
         $user->save();
 
-        return redirect()->back()->with('status', 'profile-updated');
+        // return redirect()->back()->with('status', 'profile-updated');
+        return Redirect::route('user.dashboard')->with('success', 'Profil berhasil diperbarui!');
 
     }
 
